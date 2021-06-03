@@ -39,9 +39,15 @@ func main() {
 	e.GET("/records/recent", hello)
 	e.GET("/records/year/:year/month/:month", hello)
 
+	// Set port
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
+
 	// Start server
 	go func() {
-		if err := e.Start(":8000"); err != nil {
+		if err := e.Start(":" + port); err != nil {
 			e.Logger.Error("shutting down the server:", err)
 		}
 	}()
