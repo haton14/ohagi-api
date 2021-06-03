@@ -1,0 +1,11 @@
+{
+	"extensions": [
+		"golang.go"
+	],
+	"dockerComposeFile": [
+		"../docker-compose.yml",
+		"docker-compose.yml"
+	],
+	"service": "app",
+	"workspaceFolder": "/workspace"
+}

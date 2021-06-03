@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+  app:
+    build: 
+        context: ./
+    working_dir: /app
+    ports:
+      - "8000:8000"
+      - "80:80"
+    expose:
+      - 8000
+    environment:
+      TZ: Asia/Tokyo
+    tty: true
+    volumes:
+        - ./:/app:cached
