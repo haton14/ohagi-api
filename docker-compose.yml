@@ -3,6 +3,7 @@ services:
   app:
     build: 
         context: ./
+        target: build
     working_dir: /app
     ports:
       - "8000:8000"
