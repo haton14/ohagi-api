@@ -65,6 +65,7 @@ func main() {
 	e.GET("/records/recent", hello)
 	e.GET("/records/year/:year/month/:month", hello)
 	e.GET("/records", topRecords)
+	e.POST("records", postRecord)
 
 	// Set port
 	port := os.Getenv("PORT")
@@ -122,4 +123,12 @@ func topRecords(c echo.Context) error {
 		},
 	}
 	return c.JSON(http.StatusOK, records)
+}
+
+func postRecord(c echo.Context) error {
+	record := Record{}
+	if err := c.Bind(record); err != nil {
+		return err
+	}
+	return c.JSON(http.StatusCreated, record)
 }
