@@ -14,15 +14,37 @@ import (
 
 type (
 	Records struct {
-		Records []Recode `json:"records"`
+		Years []YearRecord `json:"years"`
 	}
-	Recode struct {
-		DateTime string `json:"date_time"`
-		Foods    []Food `json:"foods"`
+
+	YearRecord struct {
+		Year   int           `json:"year"`
+		Months []MonthRecord `json:"months"`
 	}
+
+	MonthRecord struct {
+		Month int         `json:"month"`
+		Days  []DayRecord `json:"days"`
+	}
+
+	DayRecord struct {
+		Day    int    `json:"day"`
+		Record Record `json:"record"`
+	}
+
+	Record struct {
+		ID            int    `json:"id"`
+		Foods         []Food `json:"foods"`
+		LastUpdatedAt int64  `json:"last_updated_at"`
+		CreatedAt     int64  `json:"created_at"`
+	}
+
 	Food struct {
-		FoodName string `json:"food_name"`
-		Weight   int    `json:"weight"`
+		ID            int    `json:"id"`
+		Name          string `json:"name"`
+		Amount        int    `json:"amount"`
+		Unit          string `json:"unit"`
+		LastUpdatedAt int64  `json:"last_updated_at,omitempty"`
 	}
 )
 
@@ -38,6 +60,7 @@ func main() {
 	e.GET("/records/today", hello)
 	e.GET("/records/recent", hello)
 	e.GET("/records/year/:year/month/:month", hello)
+	e.GET("/records", topRecords)
 
 	// Set port
 	port := os.Getenv("PORT")
@@ -65,4 +88,34 @@ func main() {
 // Handler
 func hello(c echo.Context) error {
 	return c.JSON(http.StatusOK, "Hello, World!")
+}
+
+func topRecords(c echo.Context) error {
+	records := &Records{
+		Years: []YearRecord{
+			{
+				Year: 2021,
+				Months: []MonthRecord{
+					{
+						Month: 1,
+						Days: []DayRecord{{
+							Day: 1,
+							Record: Record{
+								ID: 123,
+								Foods: []Food{{
+									ID:     12345,
+									Name:   "ペレット",
+									Amount: 10,
+									Unit:   "g",
+								}},
+								LastUpdatedAt: 1234567890,
+								CreatedAt:     1234567890,
+							},
+						}},
+					},
+				},
+			},
+		},
+	}
+	return c.JSON(http.StatusOK, records)
 }
