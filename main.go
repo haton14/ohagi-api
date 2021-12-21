@@ -32,6 +32,10 @@ type (
 		Record Record `json:"record"`
 	}
 
+	RecordsV2 struct {
+		Records []Record `json:"records"`
+	}
+
 	Record struct {
 		ID            int    `json:"id"`
 		Foods         []Food `json:"foods"`
@@ -65,6 +69,7 @@ func main() {
 	e.GET("/records/recent", hello)
 	e.GET("/records/year/:year/month/:month", hello)
 	e.GET("/records", topRecords)
+	e.GET("/records/v2", getRecords)
 	e.POST("records", postRecord)
 
 	// Set port
@@ -123,6 +128,87 @@ func topRecords(c echo.Context) error {
 		},
 	}
 	return c.JSON(http.StatusOK, records)
+}
+
+func getRecords(c echo.Context) error {
+	records := &RecordsV2{
+		[]Record{
+			{
+
+				ID: 121,
+				Foods: []Food{{
+					ID:     12344,
+					Name:   "ペレット",
+					Amount: 10,
+					Unit:   "g",
+				}},
+				LastUpdatedAt: 1638280364,
+				CreatedAt:     1638280364,
+			},
+			{
+
+				ID: 122,
+				Foods: []Food{{
+					ID:     12344,
+					Name:   "ペレット",
+					Amount: 10,
+					Unit:   "g",
+				}},
+				LastUpdatedAt: 1638366764,
+				CreatedAt:     1638366764,
+			},
+			{
+
+				ID: 123,
+				Foods: []Food{{
+					ID:     12344,
+					Name:   "ペレット",
+					Amount: 10,
+					Unit:   "g",
+				}},
+				LastUpdatedAt: 1640181164,
+				CreatedAt:     1640181164,
+			},
+			{
+
+				ID: 124,
+				Foods: []Food{{
+					ID:     12344,
+					Name:   "ペレット",
+					Amount: 10,
+					Unit:   "g",
+				}},
+				LastUpdatedAt: 1640094764,
+				CreatedAt:     1640094764,
+			},
+			{
+
+				ID: 125,
+				Foods: []Food{{
+					ID:     12345,
+					Name:   "ペレット",
+					Amount: 10,
+					Unit:   "g",
+				}},
+				LastUpdatedAt: 1640958764,
+				CreatedAt:     1640958764,
+			},
+			{
+
+				ID: 126,
+				Foods: []Food{{
+					ID:     12345,
+					Name:   "ペレット",
+					Amount: 10,
+					Unit:   "g",
+				}},
+				LastUpdatedAt: 1641045164,
+				CreatedAt:     1641045164,
+			},
+		},
+	}
+	return c.JSON(http.StatusOK, records)
+
 }
 
 func postRecord(c echo.Context) error {
