@@ -127,7 +127,7 @@ func topRecords(c echo.Context) error {
 
 func postRecord(c echo.Context) error {
 	record := Record{}
-	if err := c.Bind(record); err != nil {
+	if err := c.Bind(&record); err != nil {
 		return err
 	}
 	return c.JSON(http.StatusCreated, record)
