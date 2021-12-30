@@ -1,4 +1,4 @@
-module ohagi
+module github.com/haton14/ohagi-api
 
 go 1.17
 
