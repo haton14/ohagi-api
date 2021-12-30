@@ -12,11 +12,7 @@ services:
       - 8000
     environment:
       TZ: Asia/Tokyo
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_NAME: postgres
-      DB_PASS: postgres
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
     tty: true
     volumes:
         - ./:/app:cached

@@ -48,7 +48,7 @@ func main() {
 	}))
 
 	//DataStore
-	db := datastore.NewDB("postgres", os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_NAME"), os.Getenv("DB_PASS"))
+	db := datastore.NewDB(os.Getenv("DATABASE_URL"))
 	dbClient, err := db.Open()
 	if err != nil {
 		log.Fatalf("database open err. %s", err)
