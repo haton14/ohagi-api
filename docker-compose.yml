@@ -12,6 +12,23 @@ services:
       - 8000
     environment:
       TZ: Asia/Tokyo
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_NAME: postgres
+      DB_PASS: postgres
     tty: true
     volumes:
         - ./:/app:cached
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: Asia/Tokyo
+    ports:
+      - 5432:5432
+    expose:
+      - 5432
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
