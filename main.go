@@ -18,16 +18,16 @@ type (
 	}
 
 	Record struct {
-		ID            int    `json:"id"`
+		ID            int    `json:"id,omitempty"`
 		Foods         []Food `json:"foods"`
-		LastUpdatedAt int64  `json:"last_updated_at"`
-		CreatedAt     int64  `json:"created_at"`
+		LastUpdatedAt int64  `json:"last_updated_at,omitempty"`
+		CreatedAt     int64  `json:"created_at,omitempty"`
 	}
 
 	Food struct {
-		ID            int    `json:"id"`
+		ID            int    `json:"id,omitempty"`
 		Name          string `json:"name"`
-		Amount        int    `json:"amount"`
+		Amount        int    `json:"amount,omitempty"`
 		Unit          string `json:"unit"`
 		LastUpdatedAt int64  `json:"last_updated_at,omitempty"`
 	}
