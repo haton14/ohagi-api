@@ -14,25 +14,6 @@ import (
 
 type (
 	Records struct {
-		Years []YearRecord `json:"years"`
-	}
-
-	YearRecord struct {
-		Year   int           `json:"year"`
-		Months []MonthRecord `json:"months"`
-	}
-
-	MonthRecord struct {
-		Month int         `json:"month"`
-		Days  []DayRecord `json:"days"`
-	}
-
-	DayRecord struct {
-		Day    int    `json:"day"`
-		Record Record `json:"record"`
-	}
-
-	RecordsV2 struct {
 		Records []Record `json:"records"`
 	}
 
@@ -65,11 +46,7 @@ func main() {
 	}))
 
 	// Routes
-	e.GET("/records/today", hello)
-	e.GET("/records/recent", hello)
-	e.GET("/records/year/:year/month/:month", hello)
-	e.GET("/records", topRecords)
-	e.GET("/records/v2", getRecords)
+	e.GET("/records", getRecords)
 	e.POST("records", postRecord)
 
 	// Set port
@@ -95,43 +72,8 @@ func main() {
 	}
 }
 
-// Handler
-func hello(c echo.Context) error {
-	return c.JSON(http.StatusOK, "Hello, World!")
-}
-
-func topRecords(c echo.Context) error {
-	records := &Records{
-		Years: []YearRecord{
-			{
-				Year: 2021,
-				Months: []MonthRecord{
-					{
-						Month: 1,
-						Days: []DayRecord{{
-							Day: 1,
-							Record: Record{
-								ID: 123,
-								Foods: []Food{{
-									ID:     12345,
-									Name:   "ペレット",
-									Amount: 10,
-									Unit:   "g",
-								}},
-								LastUpdatedAt: 1234567890,
-								CreatedAt:     1234567890,
-							},
-						}},
-					},
-				},
-			},
-		},
-	}
-	return c.JSON(http.StatusOK, records)
-}
-
 func getRecords(c echo.Context) error {
-	records := &RecordsV2{
+	records := Records{
 		[]Record{
 			{
 
@@ -207,7 +149,7 @@ func getRecords(c echo.Context) error {
 			},
 		},
 	}
-	return c.JSON(http.StatusOK, records)
+	return c.JSON(http.StatusOK, &records)
 
 }
 
