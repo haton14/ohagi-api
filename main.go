@@ -9,6 +9,9 @@ import (
 	"os/signal"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+	"github.com/haton14/ohagi-api/ent"
+	"github.com/haton14/ohagi-api/ent/recordfood"
 	"github.com/haton14/ohagi-api/infrastructure/datastore"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -27,13 +30,17 @@ type (
 	}
 
 	Food struct {
-		ID            int    `json:"id,omitempty"`
+		ID            *int   `json:"id,omitempty"`
 		Name          string `json:"name"`
 		Amount        int    `json:"amount,omitempty"`
 		Unit          string `json:"unit"`
-		LastUpdatedAt int64  `json:"last_updated_at,omitempty"`
+		LastUpdatedAt *int64 `json:"last_updated_at,omitempty"`
 	}
 )
+
+type Controller struct {
+	dbClient *ent.Client
+}
 
 func main() {
 	// Echo instance
@@ -54,6 +61,7 @@ func main() {
 		log.Fatalf("database open err. %s", err)
 	}
 	defer dbClient.Close()
+	controller := Controller{dbClient: dbClient}
 
 	//Migration
 	if err := dbClient.Schema.Create(context.Background()); err != nil {
@@ -61,7 +69,7 @@ func main() {
 	}
 
 	// Routes
-	e.GET("/records", getRecords)
+	e.GET("/records", controller.getRecords)
 	e.POST("records", postRecord)
 
 	// Set port
@@ -87,83 +95,50 @@ func main() {
 	}
 }
 
-func getRecords(c echo.Context) error {
-	records := Records{
-		[]Record{
-			{
-
-				ID: 121,
-				Foods: []Food{{
-					ID:     12344,
-					Name:   "ペレット",
-					Amount: 10,
-					Unit:   "g",
-				}},
-				LastUpdatedAt: 1638280364,
-				CreatedAt:     1638280364,
-			},
-			{
-
-				ID: 122,
-				Foods: []Food{{
-					ID:     12344,
-					Name:   "ペレット",
-					Amount: 10,
-					Unit:   "g",
-				}},
-				LastUpdatedAt: 1638366764,
-				CreatedAt:     1638366764,
-			},
-			{
-
-				ID: 123,
-				Foods: []Food{{
-					ID:     12344,
-					Name:   "ペレット",
-					Amount: 10,
-					Unit:   "g",
-				}},
-				LastUpdatedAt: 1640181164,
-				CreatedAt:     1640181164,
-			},
-			{
-
-				ID: 124,
-				Foods: []Food{{
-					ID:     12344,
-					Name:   "ペレット",
-					Amount: 10,
-					Unit:   "g",
-				}},
-				LastUpdatedAt: 1640094764,
-				CreatedAt:     1640094764,
-			},
-			{
-
-				ID: 125,
-				Foods: []Food{{
-					ID:     12345,
-					Name:   "ペレット",
-					Amount: 10,
-					Unit:   "g",
-				}},
-				LastUpdatedAt: 1640958764,
-				CreatedAt:     1640958764,
-			},
-			{
-
-				ID: 126,
-				Foods: []Food{{
-					ID:     12345,
-					Name:   "ペレット",
-					Amount: 10,
-					Unit:   "g",
-				}},
-				LastUpdatedAt: 1641045164,
-				CreatedAt:     1641045164,
-			},
-		},
+func (controller *Controller) getRecords(c echo.Context) error {
+	rq := controller.dbClient.Record.Query().Limit(50)
+	recordsEnt, err := rq.All(context.Background())
+	if err != nil {
+		c.Logger().Error("All: ", err)
+		return c.String(http.StatusInternalServerError, "All: "+err.Error())
 	}
+	records := []Record{}
+	ids := []int{}
+	for _, r := range recordsEnt {
+		records = append(records, Record{
+			ID:            r.ID,
+			Foods:         []Food{},
+			CreatedAt:     r.CreatedAt.Unix(),
+			LastUpdatedAt: r.LastUpdatedAt.Unix(),
+		})
+		ids = append(ids, r.ID)
+	}
+	recordFoodsEnt, err := controller.dbClient.RecordFood.Query().
+		Where(func(s *sql.Selector) { sql.InInts(recordfood.FieldRecordID, ids...) }).
+		All(context.Background())
+	foodsEnt, err := controller.dbClient.Food.Query().All(context.Background())
+
+	for i, r := range records {
+		foods := []Food{}
+		for _, rf := range recordFoodsEnt {
+			if r.ID == rf.RecordID {
+				for _, f := range foodsEnt {
+					if rf.FoodID == f.ID {
+						food := Food{
+							Name:   f.Name,
+							Amount: rf.Amount,
+							Unit:   f.Unit,
+						}
+						foods = append(foods, food)
+						continue
+					}
+				}
+			}
+		}
+		r.Foods = append(r.Foods, foods...)
+		records[i] = r
+	}
+
 	return c.JSON(http.StatusOK, &records)
 
 }
