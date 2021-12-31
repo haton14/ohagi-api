@@ -70,7 +70,7 @@ func main() {
 
 	// Routes
 	e.GET("/records", controller.getRecords)
-	e.POST("records", postRecord)
+	e.POST("records", controller.postRecord)
 
 	// Set port
 	port := os.Getenv("PORT")
@@ -116,7 +116,15 @@ func (controller *Controller) getRecords(c echo.Context) error {
 	recordFoodsEnt, err := controller.dbClient.RecordFood.Query().
 		Where(func(s *sql.Selector) { sql.InInts(recordfood.FieldRecordID, ids...) }).
 		All(context.Background())
+	if err != nil {
+		c.Logger().Error("All: ", err)
+		return c.String(http.StatusInternalServerError, "All: "+err.Error())
+	}
 	foodsEnt, err := controller.dbClient.Food.Query().All(context.Background())
+	if err != nil {
+		c.Logger().Error("All: ", err)
+		return c.String(http.StatusInternalServerError, "All: "+err.Error())
+	}
 
 	for i, r := range records {
 		foods := []Food{}
@@ -143,10 +151,49 @@ func (controller *Controller) getRecords(c echo.Context) error {
 
 }
 
-func postRecord(c echo.Context) error {
+func (controller *Controller) postRecord(c echo.Context) error {
 	record := Record{}
 	if err := c.Bind(&record); err != nil {
 		return err
 	}
+	recordEnt, err := controller.dbClient.Record.Create().SetCreatedAt(time.Now()).SetLastUpdatedAt(time.Now()).Save(context.Background())
+	if err != nil {
+		c.Logger().Error("Save: ", err)
+		return c.String(http.StatusInternalServerError, "Save: "+err.Error())
+	}
+	foodsEnt, err := controller.dbClient.Food.Query().All(context.Background())
+	if err != nil {
+		c.Logger().Error("All: ", err)
+		return c.String(http.StatusInternalServerError, "All: "+err.Error())
+	}
+	recordFoodBulk := make([]*ent.RecordFoodCreate, len(record.Foods))
+	for i, food := range record.Foods {
+		match := false
+		for _, foodEnt := range foodsEnt {
+			if food.Name == foodEnt.Name && food.Unit == foodEnt.Unit {
+				recordFoodBulk[i] = controller.dbClient.RecordFood.Create().SetRecordID(recordEnt.ID).SetFoodID(foodEnt.ID).SetAmount(food.Amount)
+				match = true
+				break
+			}
+		}
+		if !match {
+			foodEnt, err := controller.dbClient.Food.Create().SetName(food.Name).SetUnit(food.Unit).Save(context.Background())
+			if err != nil {
+				c.Logger().Error("All: ", err)
+				return c.String(http.StatusInternalServerError, "All: "+err.Error())
+			}
+			recordFoodBulk[i] = controller.dbClient.RecordFood.Create().SetRecordID(recordEnt.ID).SetFoodID(foodEnt.ID).SetAmount(food.Amount)
+		}
+	}
+	_, err = controller.dbClient.RecordFood.CreateBulk(recordFoodBulk...).Save(context.Background())
+	if err != nil {
+		c.Logger().Error("All: ", err)
+		return c.String(http.StatusInternalServerError, "All: "+err.Error())
+	}
+
+	record.ID = recordEnt.ID
+	record.CreatedAt = recordEnt.CreatedAt.Unix()
+	record.LastUpdatedAt = recordEnt.LastUpdatedAt.Unix()
+
 	return c.JSON(http.StatusCreated, record)
 }
