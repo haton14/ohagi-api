@@ -147,7 +147,7 @@ func (controller *Controller) getRecords(c echo.Context) error {
 		records[i] = r
 	}
 
-	return c.JSON(http.StatusOK, &records)
+	return c.JSON(http.StatusOK, &Records{records})
 
 }
 
