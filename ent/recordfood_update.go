@@ -53,23 +53,23 @@ func (rfu *RecordFoodUpdate) AddFoodID(i int) *RecordFoodUpdate {
 }
 
 // SetAmount sets the "amount" field.
-func (rfu *RecordFoodUpdate) SetAmount(i int) *RecordFoodUpdate {
+func (rfu *RecordFoodUpdate) SetAmount(f float64) *RecordFoodUpdate {
 	rfu.mutation.ResetAmount()
-	rfu.mutation.SetAmount(i)
+	rfu.mutation.SetAmount(f)
 	return rfu
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (rfu *RecordFoodUpdate) SetNillableAmount(i *int) *RecordFoodUpdate {
-	if i != nil {
-		rfu.SetAmount(*i)
+func (rfu *RecordFoodUpdate) SetNillableAmount(f *float64) *RecordFoodUpdate {
+	if f != nil {
+		rfu.SetAmount(*f)
 	}
 	return rfu
 }
 
-// AddAmount adds i to the "amount" field.
-func (rfu *RecordFoodUpdate) AddAmount(i int) *RecordFoodUpdate {
-	rfu.mutation.AddAmount(i)
+// AddAmount adds f to the "amount" field.
+func (rfu *RecordFoodUpdate) AddAmount(f float64) *RecordFoodUpdate {
+	rfu.mutation.AddAmount(f)
 	return rfu
 }
 
@@ -206,14 +206,14 @@ func (rfu *RecordFoodUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := rfu.mutation.Amount(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: recordfood.FieldAmount,
 		})
 	}
 	if value, ok := rfu.mutation.AddedAmount(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: recordfood.FieldAmount,
 		})
@@ -264,23 +264,23 @@ func (rfuo *RecordFoodUpdateOne) AddFoodID(i int) *RecordFoodUpdateOne {
 }
 
 // SetAmount sets the "amount" field.
-func (rfuo *RecordFoodUpdateOne) SetAmount(i int) *RecordFoodUpdateOne {
+func (rfuo *RecordFoodUpdateOne) SetAmount(f float64) *RecordFoodUpdateOne {
 	rfuo.mutation.ResetAmount()
-	rfuo.mutation.SetAmount(i)
+	rfuo.mutation.SetAmount(f)
 	return rfuo
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (rfuo *RecordFoodUpdateOne) SetNillableAmount(i *int) *RecordFoodUpdateOne {
-	if i != nil {
-		rfuo.SetAmount(*i)
+func (rfuo *RecordFoodUpdateOne) SetNillableAmount(f *float64) *RecordFoodUpdateOne {
+	if f != nil {
+		rfuo.SetAmount(*f)
 	}
 	return rfuo
 }
 
-// AddAmount adds i to the "amount" field.
-func (rfuo *RecordFoodUpdateOne) AddAmount(i int) *RecordFoodUpdateOne {
-	rfuo.mutation.AddAmount(i)
+// AddAmount adds f to the "amount" field.
+func (rfuo *RecordFoodUpdateOne) AddAmount(f float64) *RecordFoodUpdateOne {
+	rfuo.mutation.AddAmount(f)
 	return rfuo
 }
 
@@ -441,14 +441,14 @@ func (rfuo *RecordFoodUpdateOne) sqlSave(ctx context.Context) (_node *RecordFood
 	}
 	if value, ok := rfuo.mutation.Amount(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: recordfood.FieldAmount,
 		})
 	}
 	if value, ok := rfuo.mutation.AddedAmount(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: recordfood.FieldAmount,
 		})

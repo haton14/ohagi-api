@@ -32,15 +32,15 @@ func (rfc *RecordFoodCreate) SetFoodID(i int) *RecordFoodCreate {
 }
 
 // SetAmount sets the "amount" field.
-func (rfc *RecordFoodCreate) SetAmount(i int) *RecordFoodCreate {
-	rfc.mutation.SetAmount(i)
+func (rfc *RecordFoodCreate) SetAmount(f float64) *RecordFoodCreate {
+	rfc.mutation.SetAmount(f)
 	return rfc
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (rfc *RecordFoodCreate) SetNillableAmount(i *int) *RecordFoodCreate {
-	if i != nil {
-		rfc.SetAmount(*i)
+func (rfc *RecordFoodCreate) SetNillableAmount(f *float64) *RecordFoodCreate {
+	if f != nil {
+		rfc.SetAmount(*f)
 	}
 	return rfc
 }
@@ -193,7 +193,7 @@ func (rfc *RecordFoodCreate) createSpec() (*RecordFood, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := rfc.mutation.Amount(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: recordfood.FieldAmount,
 		})

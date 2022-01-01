@@ -35,9 +35,9 @@ var (
 	// RecordFoodsColumns holds the columns for the "record_foods" table.
 	RecordFoodsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "record_id", Type: field.TypeInt},
+		{Name: "record_id", Type: field.TypeInt, Unique: true},
 		{Name: "food_id", Type: field.TypeInt},
-		{Name: "amount", Type: field.TypeInt, Default: 1},
+		{Name: "amount", Type: field.TypeFloat64, Default: 1},
 	}
 	// RecordFoodsTable holds the schema information for the "record_foods" table.
 	RecordFoodsTable = &schema.Table{

@@ -732,8 +732,8 @@ type RecordFoodMutation struct {
 	addrecord_id  *int
 	food_id       *int
 	addfood_id    *int
-	amount        *int
-	addamount     *int
+	amount        *float64
+	addamount     *float64
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*RecordFood, error)
@@ -932,13 +932,13 @@ func (m *RecordFoodMutation) ResetFoodID() {
 }
 
 // SetAmount sets the "amount" field.
-func (m *RecordFoodMutation) SetAmount(i int) {
-	m.amount = &i
+func (m *RecordFoodMutation) SetAmount(f float64) {
+	m.amount = &f
 	m.addamount = nil
 }
 
 // Amount returns the value of the "amount" field in the mutation.
-func (m *RecordFoodMutation) Amount() (r int, exists bool) {
+func (m *RecordFoodMutation) Amount() (r float64, exists bool) {
 	v := m.amount
 	if v == nil {
 		return
@@ -949,7 +949,7 @@ func (m *RecordFoodMutation) Amount() (r int, exists bool) {
 // OldAmount returns the old "amount" field's value of the RecordFood entity.
 // If the RecordFood object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RecordFoodMutation) OldAmount(ctx context.Context) (v int, err error) {
+func (m *RecordFoodMutation) OldAmount(ctx context.Context) (v float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldAmount is only allowed on UpdateOne operations")
 	}
@@ -963,17 +963,17 @@ func (m *RecordFoodMutation) OldAmount(ctx context.Context) (v int, err error) {
 	return oldValue.Amount, nil
 }
 
-// AddAmount adds i to the "amount" field.
-func (m *RecordFoodMutation) AddAmount(i int) {
+// AddAmount adds f to the "amount" field.
+func (m *RecordFoodMutation) AddAmount(f float64) {
 	if m.addamount != nil {
-		*m.addamount += i
+		*m.addamount += f
 	} else {
-		m.addamount = &i
+		m.addamount = &f
 	}
 }
 
 // AddedAmount returns the value that was added to the "amount" field in this mutation.
-func (m *RecordFoodMutation) AddedAmount() (r int, exists bool) {
+func (m *RecordFoodMutation) AddedAmount() (r float64, exists bool) {
 	v := m.addamount
 	if v == nil {
 		return
@@ -1069,7 +1069,7 @@ func (m *RecordFoodMutation) SetField(name string, value ent.Value) error {
 		m.SetFoodID(v)
 		return nil
 	case recordfood.FieldAmount:
-		v, ok := value.(int)
+		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1130,7 +1130,7 @@ func (m *RecordFoodMutation) AddField(name string, value ent.Value) error {
 		m.AddFoodID(v)
 		return nil
 	case recordfood.FieldAmount:
-		v, ok := value.(int)
+		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

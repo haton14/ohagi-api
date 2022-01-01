@@ -41,7 +41,7 @@ var (
 	// FoodIDValidator is a validator for the "food_id" field. It is called by the builders before save.
 	FoodIDValidator func(int) error
 	// DefaultAmount holds the default value on creation for the "amount" field.
-	DefaultAmount int
+	DefaultAmount float64
 	// AmountValidator is a validator for the "amount" field. It is called by the builders before save.
-	AmountValidator func(int) error
+	AmountValidator func(float64) error
 )

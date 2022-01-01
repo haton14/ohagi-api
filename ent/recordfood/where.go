@@ -105,7 +105,7 @@ func FoodID(v int) predicate.RecordFood {
 }
 
 // Amount applies equality check predicate on the "amount" field. It's identical to AmountEQ.
-func Amount(v int) predicate.RecordFood {
+func Amount(v float64) predicate.RecordFood {
 	return predicate.RecordFood(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldAmount), v))
 	})
@@ -264,21 +264,21 @@ func FoodIDLTE(v int) predicate.RecordFood {
 }
 
 // AmountEQ applies the EQ predicate on the "amount" field.
-func AmountEQ(v int) predicate.RecordFood {
+func AmountEQ(v float64) predicate.RecordFood {
 	return predicate.RecordFood(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldAmount), v))
 	})
 }
 
 // AmountNEQ applies the NEQ predicate on the "amount" field.
-func AmountNEQ(v int) predicate.RecordFood {
+func AmountNEQ(v float64) predicate.RecordFood {
 	return predicate.RecordFood(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldAmount), v))
 	})
 }
 
 // AmountIn applies the In predicate on the "amount" field.
-func AmountIn(vs ...int) predicate.RecordFood {
+func AmountIn(vs ...float64) predicate.RecordFood {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -295,7 +295,7 @@ func AmountIn(vs ...int) predicate.RecordFood {
 }
 
 // AmountNotIn applies the NotIn predicate on the "amount" field.
-func AmountNotIn(vs ...int) predicate.RecordFood {
+func AmountNotIn(vs ...float64) predicate.RecordFood {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -312,28 +312,28 @@ func AmountNotIn(vs ...int) predicate.RecordFood {
 }
 
 // AmountGT applies the GT predicate on the "amount" field.
-func AmountGT(v int) predicate.RecordFood {
+func AmountGT(v float64) predicate.RecordFood {
 	return predicate.RecordFood(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldAmount), v))
 	})
 }
 
 // AmountGTE applies the GTE predicate on the "amount" field.
-func AmountGTE(v int) predicate.RecordFood {
+func AmountGTE(v float64) predicate.RecordFood {
 	return predicate.RecordFood(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldAmount), v))
 	})
 }
 
 // AmountLT applies the LT predicate on the "amount" field.
-func AmountLT(v int) predicate.RecordFood {
+func AmountLT(v float64) predicate.RecordFood {
 	return predicate.RecordFood(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldAmount), v))
 	})
 }
 
 // AmountLTE applies the LTE predicate on the "amount" field.
-func AmountLTE(v int) predicate.RecordFood {
+func AmountLTE(v float64) predicate.RecordFood {
 	return predicate.RecordFood(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldAmount), v))
 	})

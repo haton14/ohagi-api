@@ -48,7 +48,7 @@ func init() {
 	// recordfoodDescAmount is the schema descriptor for amount field.
 	recordfoodDescAmount := recordfoodFields[2].Descriptor()
 	// recordfood.DefaultAmount holds the default value on creation for the amount field.
-	recordfood.DefaultAmount = recordfoodDescAmount.Default.(int)
+	recordfood.DefaultAmount = recordfoodDescAmount.Default.(float64)
 	// recordfood.AmountValidator is a validator for the "amount" field. It is called by the builders before save.
-	recordfood.AmountValidator = recordfoodDescAmount.Validators[0].(func(int) error)
+	recordfood.AmountValidator = recordfoodDescAmount.Validators[0].(func(float64) error)
 }

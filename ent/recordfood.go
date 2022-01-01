@@ -20,7 +20,7 @@ type RecordFood struct {
 	// FoodID holds the value of the "food_id" field.
 	FoodID int `json:"food_id,omitempty"`
 	// Amount holds the value of the "amount" field.
-	Amount int `json:"amount,omitempty"`
+	Amount float64 `json:"amount,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -28,7 +28,9 @@ func (*RecordFood) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case recordfood.FieldID, recordfood.FieldRecordID, recordfood.FieldFoodID, recordfood.FieldAmount:
+		case recordfood.FieldAmount:
+			values[i] = new(sql.NullFloat64)
+		case recordfood.FieldID, recordfood.FieldRecordID, recordfood.FieldFoodID:
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type RecordFood", columns[i])
@@ -64,10 +66,10 @@ func (rf *RecordFood) assignValues(columns []string, values []interface{}) error
 				rf.FoodID = int(value.Int64)
 			}
 		case recordfood.FieldAmount:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field amount", values[i])
 			} else if value.Valid {
-				rf.Amount = int(value.Int64)
+				rf.Amount = value.Float64
 			}
 		}
 	}
