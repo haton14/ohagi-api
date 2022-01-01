@@ -13,7 +13,7 @@ type RecordFood struct {
 // Fields of the RecordFood.
 func (RecordFood) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("record_id").Positive().Unique(),
+		field.Int("record_id").Positive(),
 		field.Int("food_id").Positive(),
 		field.Float("amount").Positive().Default(1),
 	}
