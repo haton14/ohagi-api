@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/haton14/ohagi-api/controller/schema"
+	"github.com/haton14/ohagi-api/domain/entity"
 	"github.com/haton14/ohagi-api/ent"
 	"github.com/haton14/ohagi-api/ent/recordfood"
 	"github.com/labstack/echo/v4"
@@ -81,10 +82,7 @@ func (r *Record) List(c echo.Context) error {
 }
 
 func (r *Record) Create(c echo.Context) error {
-	record := schema.Record{}
-	if err := c.Bind(&record); err != nil {
-		return err
-	}
+	request, err := schema.NewRecord(c)
 	recordEnt, err := r.dbClient.Record.Create().SetCreatedAt(time.Now()).SetLastUpdatedAt(time.Now()).Save(context.Background())
 	if err != nil {
 		c.Logger().Error("Save: ", err)
@@ -95,12 +93,15 @@ func (r *Record) Create(c echo.Context) error {
 		c.Logger().Error("All: ", err)
 		return c.String(http.StatusInternalServerError, "All: "+err.Error())
 	}
-	recordFoodBulk := make([]*ent.RecordFoodCreate, len(record.Foods))
-	for i, food := range record.Foods {
+	recordFoodBulk := make([]*ent.RecordFoodCreate, len(request.GetFoods()))
+	foods := make([]entity.Food, len(request.GetFoods()))
+	for i, food := range request.GetFoods() {
 		match := false
 		for _, foodEnt := range foodsEnt {
 			if food.Name == foodEnt.Name && food.Unit == foodEnt.Unit {
 				recordFoodBulk[i] = r.dbClient.RecordFood.Create().SetRecordID(recordEnt.ID).SetFoodID(foodEnt.ID).SetAmount(food.Amount)
+				foodE, _ := entity.NewFood(foodEnt.ID, foodEnt.Name, food.Amount, foodEnt.Unit)
+				foods = append(foods, foodE)
 				match = true
 				break
 			}
@@ -112,6 +113,8 @@ func (r *Record) Create(c echo.Context) error {
 				return c.String(http.StatusInternalServerError, "All: "+err.Error())
 			}
 			recordFoodBulk[i] = r.dbClient.RecordFood.Create().SetRecordID(recordEnt.ID).SetFoodID(foodEnt.ID).SetAmount(food.Amount)
+			foodE, _ := entity.NewFood(foodEnt.ID, foodEnt.Name, food.Amount, foodEnt.Unit)
+			foods = append(foods, foodE)
 		}
 	}
 	_, err = r.dbClient.RecordFood.CreateBulk(recordFoodBulk...).Save(context.Background())
@@ -120,9 +123,16 @@ func (r *Record) Create(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "All: "+err.Error())
 	}
 
-	record.ID = recordEnt.ID
-	record.CreatedAt = recordEnt.CreatedAt.Unix()
-	record.LastUpdatedAt = recordEnt.LastUpdatedAt.Unix()
+	recordE, _ := entity.NewRecord(recordEnt.ID, foods, recordEnt.LastUpdatedAt.Unix(), recordEnt.CreatedAt.Unix())
 
-	return c.JSON(http.StatusCreated, record)
+	responseFoods := make([]schema.Food, len(recordE.Foods()))
+	for _, food := range recordE.Foods() {
+		id := food.ID()
+		f := schema.Food{ID: &id, Name: food.Name(), Amount: food.Amount(), Unit: food.Unit()}
+		responseFoods = append(responseFoods, f)
+	}
+
+	response := schema.Record{ID: recordE.ID(), Foods: responseFoods, LastUpdatedAt: recordE.LastUpdatedAt(), CreatedAt: recordE.CreatedAt()}
+
+	return c.JSON(http.StatusCreated, response)
 }
