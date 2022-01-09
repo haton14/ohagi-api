@@ -12,7 +12,7 @@ import (
 )
 
 type CreateRecordIF interface {
-	Create(request schema.RecordIF, logger echo.Logger) (entity.Record, error)
+	Create(request schema.RecordRequestIF, logger echo.Logger) (entity.Record, error)
 }
 
 type Record struct {
@@ -27,7 +27,7 @@ func NewCreateRecord(dbClient *ent.Client) CreateRecordIF {
 	return CreateRecord{dbClient: dbClient}
 }
 
-func (u CreateRecord) Create(request schema.RecordIF, logger echo.Logger) (entity.Record, error) {
+func (u CreateRecord) Create(request schema.RecordRequestIF, logger echo.Logger) (entity.Record, error) {
 	recordEnt, err := u.dbClient.Record.Create().SetCreatedAt(time.Now()).SetLastUpdatedAt(time.Now()).Save(context.Background())
 	if err != nil {
 		logger.Error("Save: ", err)

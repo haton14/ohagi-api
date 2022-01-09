@@ -83,7 +83,7 @@ func (r *Record) List(c echo.Context) error {
 
 func (r *Record) Create(c echo.Context) error {
 	// リクエストをもとにAPIで定義したリクエストスキーマに変換
-	request, err := schema.NewRecord(c)
+	request, err := schema.NewRecordRequest(c)
 	if err != nil {
 		c.Logger().Error("request parse: ", err)
 		return c.String(http.StatusBadRequest, "request parse: "+err.Error())
@@ -96,14 +96,6 @@ func (r *Record) Create(c echo.Context) error {
 	}
 
 	// ドメインモデルをレスポンススキーマに変換する
-	responseFoods := make([]schema.Food, 0, len(record.Foods()))
-	for _, food := range record.Foods() {
-		id := food.ID()
-		f := schema.Food{ID: &id, Name: food.Name(), Amount: food.Amount(), Unit: food.Unit()}
-		responseFoods = append(responseFoods, f)
-	}
-
-	response := schema.Record{ID: record.ID(), Foods: responseFoods, LastUpdatedAt: record.LastUpdatedAt(), CreatedAt: record.CreatedAt()}
-
-	return c.JSON(http.StatusCreated, response)
+	response := schema.NewRecordResponse(c, record)
+	return response.JSON(http.StatusCreated)
 }
