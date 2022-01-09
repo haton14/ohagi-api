@@ -94,7 +94,7 @@ func (r *Record) Create(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "All: "+err.Error())
 	}
 	recordFoodBulk := make([]*ent.RecordFoodCreate, len(request.GetFoods()))
-	foods := make([]entity.Food, len(request.GetFoods()))
+	foods := make([]entity.Food, 0, len(request.GetFoods()))
 	for i, food := range request.GetFoods() {
 		match := false
 		for _, foodEnt := range foodsEnt {
@@ -125,7 +125,7 @@ func (r *Record) Create(c echo.Context) error {
 
 	recordE, _ := entity.NewRecord(recordEnt.ID, foods, recordEnt.LastUpdatedAt.Unix(), recordEnt.CreatedAt.Unix())
 
-	responseFoods := make([]schema.Food, len(recordE.Foods()))
+	responseFoods := make([]schema.Food, 0, len(recordE.Foods()))
 	for _, food := range recordE.Foods() {
 		id := food.ID()
 		f := schema.Food{ID: &id, Name: food.Name(), Amount: food.Amount(), Unit: food.Unit()}
