@@ -11,6 +11,7 @@ import (
 	"github.com/haton14/ohagi-api/controller"
 	"github.com/haton14/ohagi-api/ent"
 	"github.com/haton14/ohagi-api/infrastructure/datastore"
+	"github.com/haton14/ohagi-api/usecase"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -39,15 +40,16 @@ func main() {
 	}
 	defer dbClient.Close()
 
-	//controller := Controller{dbClient: dbClient}
-
 	//Migration
 	if err := dbClient.Schema.Create(context.Background()); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 
+	// Usecase
+	createRecord := usecase.NewCreateRecord(dbClient)
+
 	// Controller
-	recordController := controller.NewRecord(dbClient)
+	recordController := controller.NewRecord(dbClient, createRecord)
 
 	// Routes
 	e.GET("/records", recordController.List)
