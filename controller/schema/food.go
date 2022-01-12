@@ -1,6 +1,6 @@
 package schema
 
-type Food struct {
+type food struct {
 	ID            *int    `json:"id,omitempty"`
 	Name          string  `json:"name"`
 	Amount        float64 `json:"amount,omitempty"`
