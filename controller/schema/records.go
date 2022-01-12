@@ -13,23 +13,24 @@ type RecordsResponseIF interface {
 	JSON(code int) error
 }
 type RecordsResponse struct {
-	c       echo.Context
-	records []record
+	c echo.Context
+	records
 }
 
-func NewRecordsResponse(c echo.Context, records []entity.Record) RecordsResponseIF {
-	response := make([]record, 0, len(records))
-	for _, r := range records {
-		foods := make([]food, 0, len(r.Foods()))
-		for _, f := range r.Foods() {
+func NewRecordsResponse(c echo.Context, r []entity.Record) RecordsResponseIF {
+	response := make([]record, 0, len(r))
+	for _, v := range r {
+		foods := make([]food, 0, len(v.Foods()))
+		for _, f := range v.Foods() {
 			id := f.ID()
 			food := food{ID: &id, Name: f.Name(), Amount: f.Amount(), Unit: f.Unit()}
 			foods = append(foods, food)
 		}
-		record := record{ID: r.ID(), Foods: foods, LastUpdatedAt: r.LastUpdatedAt(), CreatedAt: r.CreatedAt()}
+		record := record{ID: v.ID(), Foods: foods, LastUpdatedAt: v.LastUpdatedAt(), CreatedAt: v.CreatedAt()}
 		response = append(response, record)
 	}
-	return RecordsResponse{c, response}
+	responses := records{response}
+	return RecordsResponse{c: c, records: responses}
 }
 
 func (s RecordsResponse) JSON(code int) error {
