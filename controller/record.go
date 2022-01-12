@@ -30,19 +30,8 @@ func (r *Record) List(c echo.Context) error {
 		c.String(http.StatusInternalServerError, err.Error())
 	}
 	// ドメインモデルをレスポンススキーマに変換する
-	response := make([]schema.Record, 0, len(records))
-	for _, r := range records {
-
-		foods := make([]schema.Food, 0, len(r.Foods()))
-		for _, f := range r.Foods() {
-			id := f.ID()
-			food := schema.Food{ID: &id, Name: f.Name(), Amount: f.Amount(), Unit: f.Unit()}
-			foods = append(foods, food)
-		}
-		record := schema.Record{ID: r.ID(), Foods: foods, LastUpdatedAt: r.LastUpdatedAt(), CreatedAt: r.CreatedAt()}
-		response = append(response, record)
-	}
-	return c.JSON(http.StatusOK, &schema.Records{Records: response})
+	response := schema.NewRecordsResponse(c, records)
+	return response.JSON(http.StatusOK)
 }
 
 func (r *Record) Create(c echo.Context) error {
