@@ -46,7 +46,7 @@ func main() {
 	}
 
 	// Usecase
-	createRecord := usecase.NewCreateRecord(dbClient)
+	createRecord := usecase.NewRecord(dbClient)
 
 	// Controller
 	recordController := controller.NewRecord(dbClient, createRecord)

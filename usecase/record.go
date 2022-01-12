@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/haton14/ohagi-api/controller/schema"
 	"github.com/haton14/ohagi-api/domain/entity"
 	"github.com/haton14/ohagi-api/ent"
+	"github.com/haton14/ohagi-api/ent/recordfood"
 	"github.com/labstack/echo/v4"
 )
 
@@ -15,16 +17,28 @@ type CreateRecordIF interface {
 	Create(request schema.RecordRequestIF, logger echo.Logger) (entity.Record, error)
 }
 
+type ListRecordIF interface {
+	List(logger echo.Logger) ([]entity.Record, error)
+}
+
 type Record struct {
-	CreateRecord
+	CreateRecordIF
+	ListRecordIF
 }
 
 type CreateRecord struct {
 	dbClient *ent.Client
 }
 
-func NewCreateRecord(dbClient *ent.Client) CreateRecordIF {
-	return CreateRecord{dbClient: dbClient}
+type ListRecord struct {
+	dbClient *ent.Client
+}
+
+func NewRecord(dbClient *ent.Client) Record {
+	return Record{
+		CreateRecord{dbClient: dbClient},
+		ListRecord{dbClient: dbClient},
+	}
 }
 
 func (u CreateRecord) Create(request schema.RecordRequestIF, logger echo.Logger) (entity.Record, error) {
@@ -70,4 +84,48 @@ func (u CreateRecord) Create(request schema.RecordRequestIF, logger echo.Logger)
 
 	record, _ := entity.NewRecord(recordEnt.ID, foods, recordEnt.LastUpdatedAt.Unix(), recordEnt.CreatedAt.Unix())
 	return record, nil
+}
+
+func (u ListRecord) List(logger echo.Logger) ([]entity.Record, error) {
+	rq := u.dbClient.Record.Query().Limit(50)
+	recordsEnt, err := rq.All(context.Background())
+	if err != nil {
+		logger.Error("All: ", err)
+		return nil, fmt.Errorf("All: %w", err)
+	}
+	records := make([]entity.Record, 0, len(recordsEnt))
+	ids := make([]int, 0, len(recordsEnt))
+	for _, r := range recordsEnt {
+		ids = append(ids, r.ID)
+	}
+	recordFoodsEnt, err := u.dbClient.RecordFood.Query().
+		Where(func(s *sql.Selector) { sql.InInts(recordfood.FieldRecordID, ids...) }).
+		All(context.Background())
+	if err != nil {
+		logger.Error("All: ", err)
+		return nil, fmt.Errorf("All: %w", err)
+	}
+	foodsEnt, err := u.dbClient.Food.Query().All(context.Background())
+	if err != nil {
+		logger.Error("All: ", err)
+		return nil, fmt.Errorf("All: %w", err)
+	}
+
+	for _, r := range recordsEnt {
+		foods := make([]entity.Food, 0, len(recordFoodsEnt))
+		for _, rf := range recordFoodsEnt {
+			if r.ID == rf.RecordID {
+				for _, f := range foodsEnt {
+					if rf.FoodID == f.ID {
+						food, _ := entity.NewFood(f.ID, f.Name, rf.Amount, f.Unit)
+						foods = append(foods, food)
+						break
+					}
+				}
+			}
+		}
+		record, _ := entity.NewRecord(r.ID, foods, r.LastUpdatedAt.Unix(), r.CreatedAt.Unix())
+		records = append(records, record)
+	}
+	return records, nil
 }
