@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -127,5 +128,7 @@ func (u ListRecord) List(logger echo.Logger) ([]entity.Record, error) {
 		record, _ := entity.NewRecord(r.ID, foods, r.LastUpdatedAt.Unix(), r.CreatedAt.Unix())
 		records = append(records, record)
 	}
+
+	sort.Slice(records, func(i, j int) bool { return int(records[i].CreatedAt()) < int(records[j].CreatedAt()) })
 	return records, nil
 }

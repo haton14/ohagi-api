@@ -20,7 +20,6 @@ type RecordsResponse struct {
 func NewRecordsResponse(c echo.Context, records []entity.Record) RecordsResponseIF {
 	response := make([]Record, 0, len(records))
 	for _, r := range records {
-
 		foods := make([]Food, 0, len(r.Foods()))
 		for _, f := range r.Foods() {
 			id := f.ID()
