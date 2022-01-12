@@ -92,7 +92,7 @@ func (r *Record) Create(c echo.Context) error {
 	// リクエストスキーマをusecaseに渡し、ドメインモデルをusecaseから受け取る
 	record, err := r.usecase.Create(request, c.Logger())
 	if err != nil {
-		c.String(http.StatusInternalServerError, "All: "+err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	// ドメインモデルをレスポンススキーマに変換する
