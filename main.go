@@ -50,10 +50,12 @@ func main() {
 
 	// Controller
 	recordController := controller.NewRecord(dbClient, createRecord)
+	foodController := controller.NewFood()
 
 	// Routes
 	e.GET("/records", recordController.List)
-	e.POST("records", recordController.Create)
+	e.POST("/records", recordController.Create)
+	e.POST("/foods", foodController.Create)
 
 	// Set port
 	port := os.Getenv("PORT")
