@@ -21,10 +21,15 @@ func NewFood(usecase usecase.Food) FoodIF {
 }
 func (f *Food) Create(c echo.Context) error {
 	// リクエストをもとにAPIで定義したリクエストスキーマに変換
-	_, err := schema.NewFoodRequest(c)
+	request, err := schema.NewFoodRequest(c)
 	if err != nil {
 		c.Logger().Error("request parse: ", err)
 		return c.String(http.StatusBadRequest, "request parse: "+err.Error())
 	}
-	return c.NoContent(http.StatusOK)
+	// リクエストスキーマをusecaseに渡し、ドメインモデルをusecaseから受け取る
+	food, err := f.usecase.Create(request, c.Logger())
+
+	// ドメインモデルをレスポンススキーマに変換する
+	response := schema.NewFoodResponse(c, food)
+	return response.JSON(http.StatusCreated)
 }

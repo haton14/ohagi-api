@@ -1,5 +1,7 @@
 package entity
 
+import "errors"
+
 type Food struct {
 	id     int
 	name   string
@@ -8,11 +10,27 @@ type Food struct {
 }
 
 func NewFood(id int, name string, amount float64, unit string) (Food, error) {
+	if id < 0 {
+		return Food{}, errors.New("id isn't negative number")
+	}
+	if name == "" {
+		return Food{}, errors.New("name isn't empty")
+	}
+	if amount < 0 {
+		return Food{}, errors.New("amount isn't negative number")
+	}
+	if unit == "" {
+		return Food{}, errors.New("unit isn't empty")
+	}
 	return Food{id, name, amount, unit}, nil
 }
 
 func (e Food) ID() int {
 	return e.id
+}
+
+func (e *Food) SetID(id int) {
+	e.id = id
 }
 
 func (e Food) Name() string {

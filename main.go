@@ -11,6 +11,7 @@ import (
 	"github.com/haton14/ohagi-api/controller"
 	"github.com/haton14/ohagi-api/ent"
 	"github.com/haton14/ohagi-api/infrastructure/datastore"
+	"github.com/haton14/ohagi-api/repository"
 	"github.com/haton14/ohagi-api/usecase"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -45,9 +46,12 @@ func main() {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 
+	// Repository
+	foodRepository := repository.NewFood(dbClient)
+
 	// Usecase
 	recordUsecase := usecase.NewRecord(dbClient)
-	foodUsecase := usecase.NewFood()
+	foodUsecase := usecase.NewFood(foodRepository)
 
 	// Controller
 	recordController := controller.NewRecord(dbClient, recordUsecase)
