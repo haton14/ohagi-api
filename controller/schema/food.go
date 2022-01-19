@@ -14,6 +14,7 @@ type food struct {
 
 type FoodRequestIF interface {
 	GetName() string
+	GetUnit() string
 }
 
 func NewFoodRequest(c echo.Context) (FoodRequestIF, error) {
@@ -26,4 +27,8 @@ func NewFoodRequest(c echo.Context) (FoodRequestIF, error) {
 
 func (s food) GetName() string {
 	return s.Name
+}
+
+func (s food) GetUnit() string {
+	return s.Unit
 }

@@ -26,3 +26,11 @@ func (e Food) Amount() float64 {
 func (e Food) Unit() string {
 	return e.unit
 }
+
+func (e Food) IsNullID() bool {
+	return e.ID() == 0
+}
+
+func (e Food) IsNullAmount() bool {
+	return e.Amount() == 0
+}

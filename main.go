@@ -46,11 +46,12 @@ func main() {
 	}
 
 	// Usecase
-	createRecord := usecase.NewRecord(dbClient)
+	recordUsecase := usecase.NewRecord(dbClient)
+	foodUsecase := usecase.NewFood()
 
 	// Controller
-	recordController := controller.NewRecord(dbClient, createRecord)
-	foodController := controller.NewFood()
+	recordController := controller.NewRecord(dbClient, recordUsecase)
+	foodController := controller.NewFood(foodUsecase)
 
 	// Routes
 	e.GET("/records", recordController.List)
