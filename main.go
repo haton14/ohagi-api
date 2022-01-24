@@ -61,6 +61,7 @@ func main() {
 	e.GET("/records", recordController.List)
 	e.POST("/records", recordController.Create)
 	e.POST("/foods", foodController.Create)
+	e.GET("/foods", foodController.List)
 
 	// Set port
 	port := os.Getenv("PORT")

@@ -10,6 +10,7 @@ import (
 
 type FoodIF interface {
 	Create(c echo.Context) error
+	List(c echo.Context) error
 }
 
 type Food struct {
@@ -32,4 +33,15 @@ func (f *Food) Create(c echo.Context) error {
 	// ドメインモデルをレスポンススキーマに変換する
 	response := schema.NewFoodResponse(c, food)
 	return response.JSON(http.StatusCreated)
+}
+
+func (f *Food) List(c echo.Context) error {
+	// ドメインモデルをusecaseから受け取る
+	foods, err := f.usecase.List(c.Logger())
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+	}
+	// ドメインモデルをレスポンススキーマに変換する
+	response := schema.NewFoodsResponse(c, foods)
+	return response.JSON(http.StatusOK)
 }
