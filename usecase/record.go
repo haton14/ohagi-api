@@ -129,6 +129,6 @@ func (u ListRecord) List(logger echo.Logger) ([]entity.Record, error) {
 		records = append(records, record)
 	}
 
-	sort.Slice(records, func(i, j int) bool { return int(records[i].CreatedAt()) < int(records[j].CreatedAt()) })
+	sort.Slice(records, func(i, j int) bool { return records[i].CreatedAt() < records[j].CreatedAt() })
 	return records, nil
 }

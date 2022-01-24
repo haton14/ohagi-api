@@ -13,17 +13,25 @@ type CreateFoodIF interface {
 	Create(request schema.FoodRequestIF, logger echo.Logger) (entity.Food, error)
 }
 
+type ListFoodIF interface {
+	List(logger echo.Logger) ([]entity.Food, error)
+}
 type Food struct {
 	CreateFoodIF
+	ListFoodIF
 }
 
 type CreateFood struct {
+	foodRepo repository.FoodIF
+}
+type ListFood struct {
 	foodRepo repository.FoodIF
 }
 
 func NewFood(foodRepo repository.FoodIF) Food {
 	return Food{
 		CreateFood{foodRepo: foodRepo},
+		ListFood{foodRepo: foodRepo},
 	}
 }
 
@@ -41,4 +49,13 @@ func (u CreateFood) Create(request schema.FoodRequestIF, logger echo.Logger) (en
 		return entity.Food{}, fmt.Errorf("food save err: %s", err)
 	}
 	return food, nil
+}
+
+func (u ListFood) List(logger echo.Logger) ([]entity.Food, error) {
+	foods, err := u.foodRepo.List()
+	if err != nil {
+		return nil, fmt.Errorf("foods list err: %s", err)
+	}
+
+	return foods, nil
 }
