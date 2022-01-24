@@ -2,6 +2,7 @@ package schema
 
 import (
 	"github.com/haton14/ohagi-api/domain/entity"
+	"github.com/haton14/ohagi-api/utility/anycast"
 	"github.com/labstack/echo/v4"
 )
 
@@ -35,8 +36,7 @@ func NewFoodRequest(c echo.Context) (FoodRequestIF, error) {
 }
 
 func NewFoodResponse(c echo.Context, f entity.Food) FoodResponseIF {
-	id := f.ID()
-	return FoodResponse{c, food{ID: &id, Name: f.Name(), Unit: f.Unit()}}
+	return FoodResponse{c, food{ID: anycast.ToIntP(f.ID()), Name: f.Name(), Unit: f.Unit()}}
 }
 
 func (s food) GetName() string {
