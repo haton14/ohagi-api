@@ -7,7 +7,7 @@ import (
 )
 
 type food struct {
-	ID            *int    `json:"id,omitempty"`
+	ID            *int    `json:"id,omitempty" param:"id"`
 	Name          string  `json:"name"`
 	Amount        float64 `json:"amount,omitempty"`
 	Unit          string  `json:"unit"`
@@ -19,6 +19,7 @@ type FoodResponse struct {
 	food
 }
 type FoodRequestIF interface {
+	GetID() int
 	GetName() string
 	GetUnit() string
 }
@@ -37,6 +38,10 @@ func NewFoodRequest(c echo.Context) (FoodRequestIF, error) {
 
 func NewFoodResponse(c echo.Context, f entity.Food) FoodResponseIF {
 	return FoodResponse{c, food{ID: anycast.ToIntP(f.ID()), Name: f.Name(), Unit: f.Unit()}}
+}
+
+func (s food) GetID() int {
+	return *s.ID
 }
 
 func (s food) GetName() string {

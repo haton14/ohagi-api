@@ -16,9 +16,14 @@ type CreateFoodIF interface {
 type ListFoodIF interface {
 	List(logger echo.Logger) ([]entity.Food, error)
 }
+
+type UpdateFoodIF interface {
+	Update(request schema.FoodRequestIF, logger echo.Logger) (entity.Food, error)
+}
 type Food struct {
 	CreateFoodIF
 	ListFoodIF
+	UpdateFoodIF
 }
 
 type CreateFood struct {
@@ -28,10 +33,15 @@ type ListFood struct {
 	foodRepo repository.FoodIF
 }
 
+type UpdateFood struct {
+	foodRepo repository.FoodIF
+}
+
 func NewFood(foodRepo repository.FoodIF) Food {
 	return Food{
 		CreateFood{foodRepo: foodRepo},
 		ListFood{foodRepo: foodRepo},
+		UpdateFood{foodRepo: foodRepo},
 	}
 }
 
@@ -58,4 +68,20 @@ func (u ListFood) List(logger echo.Logger) ([]entity.Food, error) {
 	}
 
 	return foods, nil
+}
+
+func (u UpdateFood) Update(request schema.FoodRequestIF, logger echo.Logger) (entity.Food, error) {
+	food, err := entity.NewFood(request.GetID(), request.GetName(), 0, request.GetUnit())
+	if err != nil {
+		return entity.Food{}, err
+	}
+	conflict, err := u.foodRepo.FindByID(food.ID())
+	if conflict == nil {
+		return entity.Food{}, fmt.Errorf("not exit food. id:%d, name: %s, unit: %s", food.ID(), food.Name(), food.Unit())
+	}
+	updateFood, err := u.foodRepo.UpdateNameUnitFindByID(food.Name(), food.Unit(), food.ID())
+	if err != nil {
+		return entity.Food{}, fmt.Errorf("food update err: %s", err)
+	}
+	return *updateFood, nil
 }

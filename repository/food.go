@@ -13,6 +13,8 @@ type FoodIF interface {
 	Save(food *entity.Food) error
 	FindByNameUnit(name, unit string) (*entity.Food, error)
 	List() ([]entity.Food, error)
+	FindByID(id int) (*entity.Food, error)
+	UpdateNameUnitFindByID(name, unit string, id int) (*entity.Food, error)
 }
 
 type Food struct {
@@ -60,4 +62,22 @@ func (r Food) List() ([]entity.Food, error) {
 	sort.SliceStable(foods, func(i, j int) bool { return foods[i].Unit() < foods[j].Unit() })
 	sort.SliceStable(foods, func(i, j int) bool { return foods[i].Name() < foods[j].Name() })
 	return foods, nil
+}
+
+func (r Food) FindByID(id int) (*entity.Food, error) {
+	db, err := r.dbClient.Food.Get(context.Background(), id)
+	if err != nil {
+		return nil, err
+	}
+	food, _ := entity.NewFood(db.ID, db.Name, 0, db.Unit)
+	return &food, nil
+}
+
+func (r Food) UpdateNameUnitFindByID(name, unit string, id int) (*entity.Food, error) {
+	db, err := r.dbClient.Food.UpdateOneID(id).SetName(name).SetUnit(unit).Save(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	food, _ := entity.NewFood(db.ID, db.Name, 0, db.Unit)
+	return &food, nil
 }
