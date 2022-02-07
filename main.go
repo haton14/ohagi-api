@@ -11,6 +11,7 @@ import (
 	"github.com/haton14/ohagi-api/controller"
 	"github.com/haton14/ohagi-api/ent"
 	"github.com/haton14/ohagi-api/infrastructure/datastore"
+	"github.com/haton14/ohagi-api/repository"
 	"github.com/haton14/ohagi-api/usecase"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -45,15 +46,22 @@ func main() {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 
+	// Repository
+	foodRepository := repository.NewFood(dbClient)
+
 	// Usecase
-	createRecord := usecase.NewRecord(dbClient)
+	recordUsecase := usecase.NewRecord(dbClient)
+	foodUsecase := usecase.NewFood(foodRepository)
 
 	// Controller
-	recordController := controller.NewRecord(dbClient, createRecord)
+	recordController := controller.NewRecord(dbClient, recordUsecase)
+	foodController := controller.NewFood(foodUsecase)
 
 	// Routes
 	e.GET("/records", recordController.List)
-	e.POST("records", recordController.Create)
+	e.POST("/records", recordController.Create)
+	e.POST("/foods", foodController.Create)
+	e.GET("/foods", foodController.List)
 
 	// Set port
 	port := os.Getenv("PORT")
