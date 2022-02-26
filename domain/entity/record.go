@@ -31,7 +31,7 @@ func (e Record) CreatedAt() int64 {
 
 type Recordv2 struct {
 	id            int
-	recordFood    []RecordFood
+	recordFoods   []RecordFood
 	lastUpdatedAt int64
 	createdAt     int64
 }
@@ -44,8 +44,8 @@ func NewRecordv2(id int, recordFood []RecordFood, lastUpdatedAt int64, createdAt
 func (e Recordv2) ID() int {
 	return e.id
 }
-func (e Recordv2) RecordFood() []RecordFood {
-	return e.recordFood
+func (e Recordv2) RecordFoods() []RecordFood {
+	return e.recordFoods
 }
 
 func (e Recordv2) LastUpdatedAt() int64 {

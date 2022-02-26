@@ -48,9 +48,10 @@ func main() {
 
 	// Repository
 	foodRepository := repository.NewFood(dbClient)
+	recordRepository := repository.NewRecord(dbClient)
 
 	// Usecase
-	recordUsecase := usecase.NewRecord(dbClient)
+	recordUsecase := usecase.NewRecord(dbClient, recordRepository)
 	foodUsecase := usecase.NewFood(foodRepository)
 
 	// Controller

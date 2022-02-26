@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/haton14/ohagi-api/controller/response"
 	"github.com/haton14/ohagi-api/controller/schema"
 	"github.com/haton14/ohagi-api/ent"
 	"github.com/haton14/ohagi-api/usecase"
@@ -25,13 +26,17 @@ func NewRecord(dbClient *ent.Client, usecase usecase.Record) RecordIF {
 
 func (r *Record) List(c echo.Context) error {
 	// ドメインモデルをusecaseから受け取る
-	records, err := r.usecase.List(c.Logger())
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+	records, errResp := r.usecase.List(c.Logger())
+	if errResp != nil {
+		return c.JSON(errResp.HttpStatus, errResp)
 	}
 	// ドメインモデルをレスポンススキーマに変換する
-	response := schema.NewRecordsResponse(c, records)
-	return response.JSON(http.StatusOK)
+	resp, err := response.NewRecordGetResponse(records)
+	if err != nil {
+		c.Logger().Error(err)
+		return c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: "予期しないエラー"})
+	}
+	return c.JSON(http.StatusOK, resp)
 }
 
 func (r *Record) Create(c echo.Context) error {
