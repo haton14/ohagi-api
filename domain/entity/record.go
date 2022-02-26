@@ -28,3 +28,30 @@ func (e Record) LastUpdatedAt() int64 {
 func (e Record) CreatedAt() int64 {
 	return e.createdAt
 }
+
+type Recordv2 struct {
+	id            int
+	recordFood    []RecordFood
+	lastUpdatedAt int64
+	createdAt     int64
+}
+
+func NewRecordv2(id int, recordFood []RecordFood, lastUpdatedAt int64, createdAt int64) (Recordv2, error) {
+	sort.Slice(recordFood, func(i, j int) bool { return recordFood[i].Food().ID() < recordFood[j].Food().ID() })
+	return Recordv2{id, recordFood, lastUpdatedAt, createdAt}, nil
+}
+
+func (e Recordv2) ID() int {
+	return e.id
+}
+func (e Recordv2) RecordFood() []RecordFood {
+	return e.recordFood
+}
+
+func (e Recordv2) LastUpdatedAt() int64 {
+	return e.lastUpdatedAt
+}
+
+func (e Recordv2) CreatedAt() int64 {
+	return e.createdAt
+}
