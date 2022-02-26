@@ -1,8 +1,11 @@
 package usecase
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 
+	"github.com/haton14/ohagi-api/controller/response"
 	"github.com/haton14/ohagi-api/controller/schema"
 	"github.com/haton14/ohagi-api/domain/entity"
 	"github.com/haton14/ohagi-api/repository"
@@ -14,7 +17,7 @@ type CreateFoodIF interface {
 }
 
 type ListFoodIF interface {
-	List(logger echo.Logger) ([]entity.Food, error)
+	List(logger echo.Logger) ([]entity.Foodv2, *response.ErrorResponse)
 }
 
 type UpdateFoodIF interface {
@@ -61,12 +64,15 @@ func (u CreateFood) Create(request schema.FoodRequestIF, logger echo.Logger) (en
 	return food, nil
 }
 
-func (u ListFood) List(logger echo.Logger) ([]entity.Food, error) {
+func (u ListFood) List(logger echo.Logger) ([]entity.Foodv2, *response.ErrorResponse) {
 	foods, err := u.foodRepo.List()
-	if err != nil {
-		return nil, fmt.Errorf("foods list err: %s", err)
+	if errors.Is(err, repository.ErrNotFoundRecord) {
+		logger.Warn("%w;foodRepo.List()でエラー", err)
+		return nil, &response.ErrorResponse{Message: "データが存在しない", HttpStatus: http.StatusNotFound}
+	} else if err != nil {
+		logger.Error("%w;foodRepo.List()でエラー", err)
+		return nil, &response.ErrorResponse{Message: "予期しないエラー"}
 	}
-
 	return foods, nil
 }
 
