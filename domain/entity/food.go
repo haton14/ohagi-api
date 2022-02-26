@@ -63,7 +63,7 @@ type Foodv2 struct {
 	unit value.FoodUnit
 }
 
-func NewFoodv2(id int, name string, unit string) (*Foodv2, error) {
+func NewFoodv2(id int, name, unit string) (*Foodv2, error) {
 	vid, err := value.NewID(id)
 	if err != nil {
 		return nil, err
