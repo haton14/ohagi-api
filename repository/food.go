@@ -22,7 +22,7 @@ type Food struct {
 	dbClient *ent.Client
 }
 
-func NewFood(dbClinet *ent.Client) Food {
+func NewFood(dbClinet *ent.Client) FoodIF {
 	return Food{dbClient: dbClinet}
 }
 
@@ -50,10 +50,10 @@ func (r Food) FindByNameUnit(name, unit string) (*entity.Foodv2, error) {
 func (r Food) List() ([]entity.Foodv2, error) {
 	db, err := r.dbClient.Food.Query().All(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("[%w]foodの検索時", ErrOthers)
+		return nil, fmt.Errorf("[%w]foodsの検索時", ErrOthers)
 	}
 	if db == nil {
-		return nil, fmt.Errorf("[%w]foodの検索結果0件", ErrNotFoundRecord)
+		return nil, fmt.Errorf("[%w]foodsの検索結果0件", ErrNotFoundRecord)
 	}
 	foods := make([]entity.Foodv2, 0, len(db))
 	for _, f := range db {
