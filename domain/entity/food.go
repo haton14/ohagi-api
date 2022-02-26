@@ -1,6 +1,10 @@
 package entity
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/haton14/ohagi-api/domain/value"
+)
 
 type Food struct {
 	id     int
@@ -51,4 +55,37 @@ func (e Food) IsNullID() bool {
 
 func (e Food) IsNullAmount() bool {
 	return e.Amount() == 0
+}
+
+type Foodv2 struct {
+	id   value.ID
+	name value.FoodName
+	unit value.FoodUnit
+}
+
+func NewFoodv2(id int, name string, unit string) (*Foodv2, error) {
+	vid, err := value.NewID(id)
+	if err != nil {
+		return nil, err
+	}
+	vname, err := value.NewFoodName(name)
+	if err != nil {
+		return nil, err
+	}
+	vunit, err := value.NewFoodUnit(unit)
+	if err != nil {
+		return nil, err
+	}
+	return &Foodv2{*vid, *vname, *vunit}, nil
+}
+func (v Foodv2) ID() int {
+	return v.id.Value()
+}
+
+func (v Foodv2) Name() string {
+	return v.name.Value()
+}
+
+func (v Foodv2) Unit() string {
+	return v.unit.Value()
 }
