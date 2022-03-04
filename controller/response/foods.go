@@ -6,6 +6,7 @@ type FoodGetResponse struct {
 	Foods []Food `json:"foods"`
 }
 
+type FoodsPatch Food
 type Food struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
@@ -15,8 +16,16 @@ type Food struct {
 func NewFoodGetResponse(foods []entity.Foodv3) (*FoodGetResponse, error) {
 	response := make([]Food, 0, len(foods))
 	for _, food := range foods {
-		resp := Food{food.ID(), food.Name(), food.Unit()}
+		resp := Food{food.ID().Value(), food.Value().Name(), food.Value().Unit()}
 		response = append(response, resp)
 	}
 	return &FoodGetResponse{response}, nil
+}
+
+func NewFoodsPatch(food entity.Foodv3) *FoodsPatch {
+	return &FoodsPatch{
+		ID:   food.ID().Value(),
+		Name: food.Value().Name(),
+		Unit: food.Value().Unit(),
+	}
 }

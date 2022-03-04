@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/haton14/ohagi-api/controller/request"
 	"github.com/haton14/ohagi-api/controller/response"
 	"github.com/haton14/ohagi-api/controller/schema"
 	"github.com/haton14/ohagi-api/usecase"
@@ -55,15 +56,17 @@ func (f *Food) List(c echo.Context) error {
 
 func (f *Food) Update(c echo.Context) error {
 	// リクエストをもとにAPIで定義したリクエストスキーマに変換
-	request, err := schema.NewFoodRequest(c)
+	req, err := request.NewFoodsPatch(c)
 	if err != nil {
 		c.Logger().Error("request parse: ", err)
 		return c.String(http.StatusBadRequest, "request parse: "+err.Error())
 	}
 	// リクエストスキーマをusecaseに渡し、ドメインモデルをusecaseから受け取る
-	food, err := f.usecase.Update(request, c.Logger())
-
+	food, errResp := f.usecase.Update(*req, c.Logger())
+	if errResp != nil {
+		return c.JSON(errResp.HttpStatus, errResp)
+	}
 	// ドメインモデルをレスポンススキーマに変換する
-	response := schema.NewFoodResponse(c, food)
-	return response.JSON(http.StatusCreated)
+	resp := response.NewFoodsPatch(*food)
+	return c.JSON(http.StatusCreated, resp)
 }

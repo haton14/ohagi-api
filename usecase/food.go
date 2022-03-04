@@ -21,7 +21,7 @@ type ListFoodIF interface {
 }
 
 type UpdateFoodIF interface {
-	Update(request schema.FoodRequestIF, logger echo.Logger) (entity.Food, error)
+	Update(food entity.Foodv3, logger echo.Logger) (*entity.Foodv3, *response.ErrorResponse)
 }
 type Food struct {
 	CreateFoodIF
@@ -76,18 +76,19 @@ func (u ListFood) List(logger echo.Logger) ([]entity.Foodv3, *response.ErrorResp
 	return foods, nil
 }
 
-func (u UpdateFood) Update(request schema.FoodRequestIF, logger echo.Logger) (entity.Food, error) {
-	food, err := entity.NewFood(request.GetID(), request.GetName(), 0, request.GetUnit())
+func (u UpdateFood) Update(food entity.Foodv3, logger echo.Logger) (*entity.Foodv3, *response.ErrorResponse) {
+	_, err := u.foodRepo.FindByIDV2(food.ID())
+	if errors.Is(err, repository.ErrNotFoundRecord) {
+		logger.Warn("%w;foodRepo.FindByID()でエラー", err)
+		return nil, &response.ErrorResponse{Message: "データが存在しない", HttpStatus: http.StatusNotFound}
+	} else if err != nil {
+		logger.Error("%w;foodRepo.FindByID()でエラー", err)
+		return nil, &response.ErrorResponse{Message: "予期しないエラー", HttpStatus: http.StatusInternalServerError}
+	}
+	updateFood, err := u.foodRepo.UpdateNameUnitFindByIDV2(food)
 	if err != nil {
-		return entity.Food{}, err
+		logger.Warn("%w;foodRepo.UpdateNameUnitFindByIDV2()でエラー", err)
+		return nil, &response.ErrorResponse{Message: "予期しないエラー", HttpStatus: http.StatusInternalServerError}
 	}
-	conflict, err := u.foodRepo.FindByID(food.ID())
-	if conflict == nil {
-		return entity.Food{}, fmt.Errorf("not exit food. id:%d, name: %s, unit: %s", food.ID(), food.Name(), food.Unit())
-	}
-	updateFood, err := u.foodRepo.UpdateNameUnitFindByID(food.Name(), food.Unit(), food.ID())
-	if err != nil {
-		return entity.Food{}, fmt.Errorf("food update err: %s", err)
-	}
-	return *updateFood, nil
+	return updateFood, nil
 }
