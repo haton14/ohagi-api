@@ -89,3 +89,24 @@ func (v Foodv2) Name() string {
 func (v Foodv2) Unit() string {
 	return v.unit.Value()
 }
+
+type Foodv3 struct {
+	id    value.ID
+	value value.Food
+}
+
+func NewFoodv3(id value.ID, value value.Food) *Foodv3 {
+	return &Foodv3{id, value}
+}
+
+func (v Foodv3) ID() int {
+	return v.id.Value()
+}
+
+func (v Foodv3) Name() string {
+	return v.value.Name()
+}
+
+func (v Foodv3) Unit() string {
+	return v.value.Unit()
+}
