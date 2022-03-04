@@ -48,7 +48,7 @@ func (f *Food) List(c echo.Context) error {
 	}
 
 	// ドメインモデルをレスポンススキーマに変換する
-	resp, err := response.NewFoodGetResponse(foods)
+	resp, err := response.NewFoodsGet(foods)
 	if err != nil {
 		c.Logger().Error(err)
 		return c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: "予期しないエラー"})
