@@ -6,6 +6,7 @@ type FoodGetResponse struct {
 	Foods []Food `json:"foods"`
 }
 
+type FoodsPost Food
 type FoodsPatch Food
 type Food struct {
 	ID   int    `json:"id"`
@@ -20,6 +21,14 @@ func NewFoodGetResponse(foods []entity.Foodv3) (*FoodGetResponse, error) {
 		response = append(response, resp)
 	}
 	return &FoodGetResponse{response}, nil
+}
+
+func NewFoodsPost(food entity.Foodv3) *FoodsPost {
+	return &FoodsPost{
+		ID:   food.ID().Value(),
+		Name: food.Value().Name(),
+		Unit: food.Value().Unit(),
+	}
 }
 
 func NewFoodsPatch(food entity.Foodv3) *FoodsPatch {
