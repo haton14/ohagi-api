@@ -7,6 +7,7 @@ type FoodsGet struct {
 }
 
 type FoodsPost Food
+
 type FoodsPatch Food
 type Food struct {
 	ID   int    `json:"id"`
