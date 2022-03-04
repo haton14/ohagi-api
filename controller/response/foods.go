@@ -12,10 +12,10 @@ type Food struct {
 	Unit string `json:"unit"`
 }
 
-func NewFoodGetResponse(f []entity.Foodv2) (*FoodGetResponse, error) {
-	response := make([]Food, 0, len(f))
-	for _, ff := range f {
-		resp := Food{ff.ID(), ff.Name(), ff.Unit()}
+func NewFoodGetResponse(foods []entity.Foodv3) (*FoodGetResponse, error) {
+	response := make([]Food, 0, len(foods))
+	for _, food := range foods {
+		resp := Food{food.ID(), food.Name(), food.Unit()}
 		response = append(response, resp)
 	}
 	return &FoodGetResponse{response}, nil

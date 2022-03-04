@@ -17,7 +17,7 @@ type CreateFoodIF interface {
 }
 
 type ListFoodIF interface {
-	List(logger echo.Logger) ([]entity.Foodv2, *response.ErrorResponse)
+	List(logger echo.Logger) ([]entity.Foodv3, *response.ErrorResponse)
 }
 
 type UpdateFoodIF interface {
@@ -64,14 +64,14 @@ func (u CreateFood) Create(request schema.FoodRequestIF, logger echo.Logger) (en
 	return food, nil
 }
 
-func (u ListFood) List(logger echo.Logger) ([]entity.Foodv2, *response.ErrorResponse) {
-	foods, err := u.foodRepo.List()
+func (u ListFood) List(logger echo.Logger) ([]entity.Foodv3, *response.ErrorResponse) {
+	foods, err := u.foodRepo.ListV2()
 	if errors.Is(err, repository.ErrNotFoundRecord) {
 		logger.Warn("%w;foodRepo.List()でエラー", err)
 		return nil, &response.ErrorResponse{Message: "データが存在しない", HttpStatus: http.StatusNotFound}
 	} else if err != nil {
 		logger.Error("%w;foodRepo.List()でエラー", err)
-		return nil, &response.ErrorResponse{Message: "予期しないエラー"}
+		return nil, &response.ErrorResponse{Message: "予期しないエラー", HttpStatus: http.StatusInternalServerError}
 	}
 	return foods, nil
 }
