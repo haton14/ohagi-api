@@ -48,20 +48,20 @@ func NewFood(foodRepo repository.FoodIF) Food {
 }
 
 func (u CreateFood) Create(f value.Food, logger echo.Logger) (*entity.Foodv3, *response.ErrorResponse) {
-	conflict, err := u.foodRepo.FindByNameUnitV2(f)
+	conflict, err := u.foodRepo.FindByNameUnit(f)
 	if len(conflict) > 0 {
 		return nil, &response.ErrorResponse{Message: "登録しようとした食事は既に存在", HttpStatus: http.StatusConflict}
 	}
-	food, err := u.foodRepo.SaveV2(f)
+	food, err := u.foodRepo.Save(f)
 	if err != nil {
-		logger.Error("%w;foodRepo.SaveV2()でエラー", err)
+		logger.Error("%w;foodRepo.Save()でエラー", err)
 		return nil, &response.ErrorResponse{Message: "予期しないエラー", HttpStatus: http.StatusInternalServerError}
 	}
 	return food, nil
 }
 
 func (u ListFood) List(logger echo.Logger) ([]entity.Foodv3, *response.ErrorResponse) {
-	foods, err := u.foodRepo.ListV2()
+	foods, err := u.foodRepo.List()
 	if errors.Is(err, repository.ErrNotFoundRecord) {
 		logger.Warn("%w;foodRepo.List()でエラー", err)
 		return nil, &response.ErrorResponse{Message: "データが存在しない", HttpStatus: http.StatusNotFound}
@@ -73,7 +73,7 @@ func (u ListFood) List(logger echo.Logger) ([]entity.Foodv3, *response.ErrorResp
 }
 
 func (u UpdateFood) Update(food entity.Foodv3, logger echo.Logger) (*entity.Foodv3, *response.ErrorResponse) {
-	_, err := u.foodRepo.FindByIDV2(food.ID())
+	_, err := u.foodRepo.FindByID(food.ID())
 	if errors.Is(err, repository.ErrNotFoundRecord) {
 		logger.Error("%w;foodRepo.FindByID()でエラー", err)
 		return nil, &response.ErrorResponse{Message: "データが存在しない", HttpStatus: http.StatusNotFound}
@@ -81,9 +81,9 @@ func (u UpdateFood) Update(food entity.Foodv3, logger echo.Logger) (*entity.Food
 		logger.Error("%w;foodRepo.FindByID()でエラー", err)
 		return nil, &response.ErrorResponse{Message: "予期しないエラー", HttpStatus: http.StatusInternalServerError}
 	}
-	updateFood, err := u.foodRepo.UpdateNameUnitFindByIDV2(food)
+	updateFood, err := u.foodRepo.UpdateNameUnitFindByID(food)
 	if err != nil {
-		logger.Error("%w;foodRepo.UpdateNameUnitFindByIDV2()でエラー", err)
+		logger.Error("%w;foodRepo.UpdateNameUnitFindByID()でエラー", err)
 		return nil, &response.ErrorResponse{Message: "予期しないエラー", HttpStatus: http.StatusInternalServerError}
 	}
 	return updateFood, nil

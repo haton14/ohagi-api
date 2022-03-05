@@ -12,11 +12,11 @@ import (
 )
 
 type FoodIF interface {
-	SaveV2(food value.Food) (*entity.Foodv3, error)
-	FindByNameUnitV2(food value.Food) ([]entity.Foodv3, error)
-	ListV2() ([]entity.Foodv3, error)
-	FindByIDV2(id value.ID) (*entity.Foodv3, error)
-	UpdateNameUnitFindByIDV2(food entity.Foodv3) (*entity.Foodv3, error)
+	Save(food value.Food) (*entity.Foodv3, error)
+	FindByNameUnit(food value.Food) ([]entity.Foodv3, error)
+	List() ([]entity.Foodv3, error)
+	FindByID(id value.ID) (*entity.Foodv3, error)
+	UpdateNameUnitFindByID(food entity.Foodv3) (*entity.Foodv3, error)
 }
 
 type Food struct {
@@ -27,7 +27,7 @@ func NewFood(dbClinet *ent.Client) FoodIF {
 	return Food{dbClient: dbClinet}
 }
 
-func (r Food) SaveV2(food value.Food) (*entity.Foodv3, error) {
+func (r Food) Save(food value.Food) (*entity.Foodv3, error) {
 	data, err := r.dbClient.Food.Create().SetName(food.Name()).SetUnit(food.Unit()).Save(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("[%w]foods保存時, detail:%s", ErrOthers, err)
@@ -39,7 +39,7 @@ func (r Food) SaveV2(food value.Food) (*entity.Foodv3, error) {
 	return entity.NewFoodv3(*id, food), nil
 }
 
-func (r Food) FindByNameUnitV2(f value.Food) ([]entity.Foodv3, error) {
+func (r Food) FindByNameUnit(f value.Food) ([]entity.Foodv3, error) {
 	datas, err := r.dbClient.Food.Query().Where(food.Name(f.Name()), food.Unit(f.Unit())).All(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("[%w]foods検索時, detail:%s", ErrOthers, err)
@@ -59,7 +59,7 @@ func (r Food) FindByNameUnitV2(f value.Food) ([]entity.Foodv3, error) {
 	return foods, nil
 }
 
-func (r Food) ListV2() ([]entity.Foodv3, error) {
+func (r Food) List() ([]entity.Foodv3, error) {
 	datas, err := r.dbClient.Food.Query().All(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("[%w]foods検索時, detail:%s", ErrOthers, err)
@@ -88,7 +88,7 @@ func (r Food) ListV2() ([]entity.Foodv3, error) {
 	return foods, nil
 }
 
-func (r Food) FindByIDV2(id value.ID) (*entity.Foodv3, error) {
+func (r Food) FindByID(id value.ID) (*entity.Foodv3, error) {
 	data, err := r.dbClient.Food.Get(context.Background(), id.Value())
 	if ent.IsNotFound(err) {
 		return nil, fmt.Errorf("[%w]foodsに該当レコードなし", ErrNotFoundRecord)
@@ -106,7 +106,7 @@ func (r Food) FindByIDV2(id value.ID) (*entity.Foodv3, error) {
 	return entity.NewFoodv3(id, *value.NewFood(*name, *unit)), nil
 }
 
-func (r Food) UpdateNameUnitFindByIDV2(food entity.Foodv3) (*entity.Foodv3, error) {
+func (r Food) UpdateNameUnitFindByID(food entity.Foodv3) (*entity.Foodv3, error) {
 	_, err := r.dbClient.Food.UpdateOneID(food.ID().Value()).SetName(food.Value().Name()).SetUnit(food.Value().Unit()).Save(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("[%w]foods更新時, detail:%s", ErrOthers, err)

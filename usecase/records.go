@@ -51,18 +51,18 @@ func (u CreateRecord) Create(
 	now := time.Now()
 	record, err := u.recordRepo.Save(now.Unix(), now.Unix())
 	if err != nil {
-		logger.Error("%w;foodRepo.SaveV2()でエラー", err)
+		logger.Error("%w;foodRepo.Save()でエラー", err)
 		return nil, &response.ErrorResponse{Message: "予期しないエラー", HttpStatus: http.StatusInternalServerError}
 	}
 
 	for _, f := range foodContentsValue {
-		conflict, err := u.foodRepo.FindByNameUnitV2(f.Food())
+		conflict, err := u.foodRepo.FindByNameUnit(f.Food())
 		if len(conflict) > 0 {
 			return nil, &response.ErrorResponse{Message: "登録しようとした食事は既に存在", HttpStatus: http.StatusConflict}
 		}
-		food, err := u.foodRepo.SaveV2(f.Food())
+		food, err := u.foodRepo.Save(f.Food())
 		if err != nil {
-			logger.Error("%w;foodRepo.SaveV2()でエラー", err)
+			logger.Error("%w;foodRepo.Save()でエラー", err)
 			return nil, &response.ErrorResponse{Message: "予期しないエラー", HttpStatus: http.StatusInternalServerError}
 		}
 		foodContentsEntity = append(foodContentsEntity, *entity.NewFoodContent(*food, f.Amont()))
