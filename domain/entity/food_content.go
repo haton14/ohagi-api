@@ -12,18 +12,14 @@ func NewFoodContent(food Food, amount value.FoodAmount) *FoodContent {
 	return &FoodContent{foodID: food.ID(), food: food.Value(), amount: amount}
 }
 
-func (f *FoodContent) ID() int {
-	return f.foodID.Value()
+func (f FoodContent) ID() value.ID {
+	return f.foodID
 }
 
-func (f *FoodContent) Name() string {
-	return f.food.Name()
+func (f FoodContent) Food() value.Food {
+	return f.food
 }
 
-func (f *FoodContent) Amont() float64 {
-	return f.Amont()
-}
-
-func (f *FoodContent) Unit() string {
-	return f.food.Unit()
+func (f FoodContent) Amont() value.FoodAmount {
+	return f.amount
 }

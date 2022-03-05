@@ -102,11 +102,12 @@ func (r Record) Save(lastUpdatedAt, createdAt int64) (*entity.Record, error) {
 
 func (r Record) SaveFoodContent(record entity.Record) error {
 	bulk := make([]*ent.RecordFoodCreate, 0, record.LenFoodContent())
-	for i, foodContent := range record.FoodContents() {
-		bulk[i] = r.dbClient.RecordFood.Create().
-			SetRecordID(record.ID()).
-			SetFoodID(foodContent.ID()).
-			SetAmount(foodContent.Amont())
+	for _, foodContent := range record.FoodContents() {
+		b := r.dbClient.RecordFood.Create().
+			SetRecordID(record.ID().Value()).
+			SetFoodID(foodContent.ID().Value()).
+			SetAmount(foodContent.Amont().Value())
+		bulk = append(bulk, b)
 	}
 	_, err := r.dbClient.RecordFood.CreateBulk(bulk...).Save(context.Background())
 	if err != nil {

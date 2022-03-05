@@ -7,6 +7,7 @@ type RecordsGet struct {
 }
 
 type RecordsPost Record
+
 type Record struct {
 	ID            int           `json:"id"`
 	FoodContents  []FoodContent `json:"foods"`
@@ -26,10 +27,10 @@ func NewRecordsGet(r []entity.Record) (*RecordsGet, error) {
 	for _, rr := range r {
 		foodContents := make([]FoodContent, 0, rr.LenFoodContent())
 		for _, f := range rr.FoodContents() {
-			foodContent := FoodContent{f.ID(), f.Name(), f.Unit(), f.Amont()}
+			foodContent := FoodContent{f.ID().Value(), f.Food().Name(), f.Food().Unit(), f.Amont().Value()}
 			foodContents = append(foodContents, foodContent)
 		}
-		record := Record{rr.ID(), foodContents, rr.LastUpdatedAt(), rr.CreatedAt()}
+		record := Record{rr.ID().Value(), foodContents, rr.LastUpdatedAt(), rr.CreatedAt()}
 		response = append(response, record)
 	}
 	return &RecordsGet{response}, nil
@@ -38,11 +39,11 @@ func NewRecordsGet(r []entity.Record) (*RecordsGet, error) {
 func NewRecordsPost(r entity.Record) (*RecordsPost, error) {
 	foodContents := make([]FoodContent, 0, r.LenFoodContent())
 	for _, f := range r.FoodContents() {
-		foodContent := FoodContent{f.ID(), f.Name(), f.Unit(), f.Amont()}
+		foodContent := FoodContent{f.ID().Value(), f.Food().Name(), f.Food().Unit(), f.Amont().Value()}
 		foodContents = append(foodContents, foodContent)
 	}
 	return &RecordsPost{
-		ID:            r.ID(),
+		ID:            r.ID().Value(),
 		FoodContents:  foodContents,
 		LastUpdatedAt: r.LastUpdatedAt(),
 		CreatedAt:     r.CreatedAt(),

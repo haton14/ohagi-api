@@ -21,8 +21,8 @@ func NewRecordv3(id value.ID, last, create int64) *Record {
 	}
 }
 
-func (r Record) ID() int {
-	return r.id.Value()
+func (r Record) ID() value.ID {
+	return r.id
 }
 
 func (r Record) LastUpdatedAt() int64 {

@@ -65,8 +65,20 @@ func (u CreateRecord) Create(
 			logger.Error("%w;foodRepo.Save()でエラー", err)
 			return nil, &response.ErrorResponse{Message: "予期しないエラー", HttpStatus: http.StatusInternalServerError}
 		}
-		foodContentsEntity = append(foodContentsEntity, *entity.NewFoodContent(*food, f.Amont()))
+		record.AddFoodContent(*food, f.Amont())
 	}
+	for _, f := range foodContentsEntity {
+		_, err := u.foodRepo.FindByID(f.ID())
+		if errors.Is(err, repository.ErrNotFoundRecord) {
+			logger.Warn("%w;foodRepo.FindByID()でエラー", err)
+			return nil, &response.ErrorResponse{Message: "データが存在しない", HttpStatus: http.StatusNotFound}
+		} else if err != nil {
+			logger.Error("%w;foodRepo.FindByID()でエラー", err)
+			return nil, &response.ErrorResponse{Message: "予期しないエラー", HttpStatus: http.StatusInternalServerError}
+		}
+		record.AddFoodContent(*entity.NewFoodv3(f.ID(), f.Food()), f.Amont())
+	}
+
 	err = u.recordRepo.SaveFoodContent(*record)
 	if err != nil {
 		logger.Error("%w;recordRepo.SaveFoodContent()でエラー", err)
