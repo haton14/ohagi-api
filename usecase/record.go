@@ -1,22 +1,20 @@
 package usecase
 
 import (
-	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/haton14/ohagi-api/controller/response"
-	"github.com/haton14/ohagi-api/controller/schema"
 	"github.com/haton14/ohagi-api/domain/entity"
+	"github.com/haton14/ohagi-api/domain/value"
 	"github.com/haton14/ohagi-api/ent"
 	"github.com/haton14/ohagi-api/repository"
 	"github.com/labstack/echo/v4"
 )
 
 type CreateRecordIF interface {
-	Create(request schema.RecordRequestIF, logger echo.Logger) (entity.Record, error)
+	Create([]entity.FoodContent, []value.FoodContent, echo.Logger) (*entity.Recordv3, *response.ErrorResponse)
 }
 
 type ListRecordIF interface {
@@ -29,62 +27,51 @@ type Record struct {
 }
 
 type CreateRecord struct {
-	dbClient *ent.Client
+	dbClient   *ent.Client
+	recordRepo repository.RecordIF
+	foodRepo   repository.FoodIF
 }
 
 type ListRecord struct {
 	recordRepo repository.RecordIF
 }
 
-func NewRecord(dbClient *ent.Client, recordRepo repository.RecordIF) Record {
+func NewRecord(dbClient *ent.Client, recordRepo repository.RecordIF, foodRepo repository.FoodIF) Record {
 	return Record{
-		CreateRecord{dbClient: dbClient},
+		CreateRecord{dbClient: dbClient, recordRepo: recordRepo, foodRepo: foodRepo},
 		ListRecord{recordRepo: recordRepo},
 	}
 }
 
-func (u CreateRecord) Create(request schema.RecordRequestIF, logger echo.Logger) (entity.Record, error) {
-	recordEnt, err := u.dbClient.Record.Create().SetCreatedAt(time.Now()).SetLastUpdatedAt(time.Now()).Save(context.Background())
+func (u CreateRecord) Create(
+	foodContentsEntity []entity.FoodContent,
+	foodContentsValue []value.FoodContent,
+	logger echo.Logger,
+) (*entity.Recordv3, *response.ErrorResponse) {
+	now := time.Now()
+	record, err := u.recordRepo.Save(now.Unix(), now.Unix())
 	if err != nil {
-		logger.Error("Save: ", err)
-		return entity.Record{}, fmt.Errorf("Save: %w", err)
-	}
-	foodsEnt, err := u.dbClient.Food.Query().All(context.Background())
-	if err != nil {
-		logger.Error("All: ", err)
-		return entity.Record{}, fmt.Errorf("All: %w", err)
-	}
-	recordFoodBulk := make([]*ent.RecordFoodCreate, len(request.GetFoods()))
-	foods := make([]entity.Food, 0, len(request.GetFoods()))
-	for i, food := range request.GetFoods() {
-		match := false
-		for _, foodEnt := range foodsEnt {
-			if food.Name == foodEnt.Name && food.Unit == foodEnt.Unit {
-				recordFoodBulk[i] = u.dbClient.RecordFood.Create().SetRecordID(recordEnt.ID).SetFoodID(foodEnt.ID).SetAmount(food.Amount)
-				foodE, _ := entity.NewFood(foodEnt.ID, foodEnt.Name, food.Amount, foodEnt.Unit)
-				foods = append(foods, foodE)
-				match = true
-				break
-			}
-		}
-		if !match {
-			foodEnt, err := u.dbClient.Food.Create().SetName(food.Name).SetUnit(food.Unit).Save(context.Background())
-			if err != nil {
-				logger.Error("All: ", err)
-				return entity.Record{}, fmt.Errorf("All: %w", err)
-			}
-			recordFoodBulk[i] = u.dbClient.RecordFood.Create().SetRecordID(recordEnt.ID).SetFoodID(foodEnt.ID).SetAmount(food.Amount)
-			foodE, _ := entity.NewFood(foodEnt.ID, foodEnt.Name, food.Amount, foodEnt.Unit)
-			foods = append(foods, foodE)
-		}
-	}
-	_, err = u.dbClient.RecordFood.CreateBulk(recordFoodBulk...).Save(context.Background())
-	if err != nil {
-		logger.Error("All: ", err)
-		return entity.Record{}, fmt.Errorf("All: %w", err)
+		logger.Error("%w;foodRepo.SaveV2()でエラー", err)
+		return nil, &response.ErrorResponse{Message: "予期しないエラー", HttpStatus: http.StatusInternalServerError}
 	}
 
-	record, _ := entity.NewRecord(recordEnt.ID, foods, recordEnt.LastUpdatedAt.Unix(), recordEnt.CreatedAt.Unix())
+	for _, f := range foodContentsValue {
+		conflict, err := u.foodRepo.FindByNameUnitV2(f.Food())
+		if len(conflict) > 0 {
+			return nil, &response.ErrorResponse{Message: "登録しようとした食事は既に存在", HttpStatus: http.StatusConflict}
+		}
+		food, err := u.foodRepo.SaveV2(f.Food())
+		if err != nil {
+			logger.Error("%w;foodRepo.SaveV2()でエラー", err)
+			return nil, &response.ErrorResponse{Message: "予期しないエラー", HttpStatus: http.StatusInternalServerError}
+		}
+		foodContentsEntity = append(foodContentsEntity, *entity.NewFoodContent(*food, f.Amont()))
+	}
+	err = u.recordRepo.SaveFoodContent(*record)
+	if err != nil {
+		logger.Error("%w;recordRepo.SaveFoodContent()でエラー", err)
+		return nil, &response.ErrorResponse{Message: "予期しないエラー", HttpStatus: http.StatusInternalServerError}
+	}
 	return record, nil
 }
 

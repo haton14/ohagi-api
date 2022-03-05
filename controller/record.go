@@ -3,8 +3,8 @@ package controller
 import (
 	"net/http"
 
+	"github.com/haton14/ohagi-api/controller/request"
 	"github.com/haton14/ohagi-api/controller/response"
-	"github.com/haton14/ohagi-api/controller/schema"
 	"github.com/haton14/ohagi-api/ent"
 	"github.com/haton14/ohagi-api/usecase"
 	"github.com/labstack/echo/v4"
@@ -41,19 +41,23 @@ func (r *Record) List(c echo.Context) error {
 
 func (r *Record) Create(c echo.Context) error {
 	// リクエストをもとにAPIで定義したリクエストスキーマに変換
-	request, err := schema.NewRecordRequest(c)
+	foodContetsEntity, foodContetsValue, err := request.NewRecordsPost(c)
 	if err != nil {
 		c.Logger().Error("request parse: ", err)
 		return c.String(http.StatusBadRequest, "request parse: "+err.Error())
 	}
 
 	// リクエストスキーマをusecaseに渡し、ドメインモデルをusecaseから受け取る
-	record, err := r.usecase.Create(request, c.Logger())
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+	record, errResp := r.usecase.Create(foodContetsEntity, foodContetsValue, c.Logger())
+	if errResp != nil {
+		return c.JSON(errResp.HttpStatus, errResp)
 	}
 
 	// ドメインモデルをレスポンススキーマに変換する
-	response := schema.NewRecordResponse(c, record)
-	return response.JSON(http.StatusCreated)
+	resp, err := response.NewRecordsPost(*record)
+	if err != nil {
+		c.Logger().Error(err)
+		return c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: "予期しないエラー"})
+	}
+	return c.JSON(http.StatusCreated, resp)
 }

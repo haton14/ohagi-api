@@ -4,15 +4,19 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/haton14/ohagi-api/domain/entity"
+	"github.com/haton14/ohagi-api/domain/value"
 	"github.com/haton14/ohagi-api/ent"
 	"github.com/haton14/ohagi-api/ent/recordfood"
 )
 
 type RecordIF interface {
 	List() ([]entity.Recordv2, error)
+	Save(lastUpdatedAt, createdAt int64) (*entity.Recordv3, error)
+	SaveFoodContent(record entity.Recordv3) error
 }
 
 type Record struct {
@@ -67,4 +71,31 @@ func (r Record) List() ([]entity.Recordv2, error) {
 
 	sort.Slice(records, func(i, j int) bool { return records[i].CreatedAt() < records[j].CreatedAt() })
 	return records, nil
+}
+
+func (r Record) Save(lastUpdatedAt, createdAt int64) (*entity.Recordv3, error) {
+	data, err := r.dbClient.Record.Create().SetCreatedAt(time.Now()).SetLastUpdatedAt(time.Now()).Save(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("[%w]records保存時, detail:%s", ErrOthers, err)
+	}
+	id, err := value.NewID(data.ID)
+	if err != nil {
+		return nil, fmt.Errorf("[%w]ID生成時, detail:%s", ErrDomainGenerate, err)
+	}
+	return entity.NewRecordv3(*id, lastUpdatedAt, createdAt), nil
+}
+
+func (r Record) SaveFoodContent(record entity.Recordv3) error {
+	bulk := make([]*ent.RecordFoodCreate, 0, record.LenFoodContent())
+	for i, foodContent := range record.FoodContents() {
+		bulk[i] = r.dbClient.RecordFood.Create().
+			SetRecordID(record.ID()).
+			SetFoodID(foodContent.ID()).
+			SetAmount(foodContent.Amont())
+	}
+	_, err := r.dbClient.RecordFood.CreateBulk(bulk...).Save(context.Background())
+	if err != nil {
+		return fmt.Errorf("[%w]record_foods保存時, detail:%s", ErrOthers, err)
+	}
+	return nil
 }

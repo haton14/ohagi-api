@@ -1,6 +1,10 @@
 package entity
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/haton14/ohagi-api/domain/value"
+)
 
 type Record struct {
 	id            int
@@ -54,4 +58,46 @@ func (e Recordv2) LastUpdatedAt() int64 {
 
 func (e Recordv2) CreatedAt() int64 {
 	return e.createdAt
+}
+
+type Recordv3 struct {
+	id            value.ID
+	lastUpdatedAt int64
+	createdAt     int64
+	foodContents  []FoodContent
+}
+
+func NewRecordv3(id value.ID, last, create int64) *Recordv3 {
+	foodContents := []FoodContent{}
+	return &Recordv3{
+		id:            id,
+		lastUpdatedAt: last,
+		createdAt:     create,
+		foodContents:  foodContents,
+	}
+}
+
+func (r Recordv3) ID() int {
+	return r.id.Value()
+}
+
+func (r Recordv3) LastUpdatedAt() int64 {
+	return r.lastUpdatedAt
+}
+
+func (r Recordv3) CreatedAt() int64 {
+	return r.createdAt
+}
+
+func (r *Recordv3) AddFoodContent(food Foodv3, amount value.FoodAmount) {
+	foodContent := NewFoodContent(food, amount)
+	r.foodContents = append(r.foodContents, *foodContent)
+}
+
+func (r Recordv3) LenFoodContent() int {
+	return len(r.foodContents)
+}
+
+func (r Recordv3) FoodContents() []FoodContent {
+	return r.foodContents
 }

@@ -43,7 +43,7 @@ func (r Food) Save(food *entity.Food) error {
 func (r Food) SaveV2(food value.Food) (*entity.Foodv3, error) {
 	data, err := r.dbClient.Food.Create().SetName(food.Name()).SetUnit(food.Unit()).Save(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("[%w]foods検索時, detail:%s", ErrOthers, err)
+		return nil, fmt.Errorf("[%w]foods保存時, detail:%s", ErrOthers, err)
 	}
 	id, err := value.NewID(data.ID)
 	if err != nil {
