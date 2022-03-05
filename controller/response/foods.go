@@ -2,9 +2,11 @@ package response
 
 import "github.com/haton14/ohagi-api/domain/entity"
 
-type FoodGetResponse struct {
+type FoodsGet struct {
 	Foods []Food `json:"foods"`
 }
+
+type FoodsPost Food
 
 type FoodsPatch Food
 type Food struct {
@@ -13,16 +15,30 @@ type Food struct {
 	Unit string `json:"unit"`
 }
 
-func NewFoodGetResponse(foods []entity.Foodv3) (*FoodGetResponse, error) {
-	response := make([]Food, 0, len(foods))
-	for _, food := range foods {
-		resp := Food{food.ID().Value(), food.Value().Name(), food.Value().Unit()}
-		response = append(response, resp)
+func NewFoodsGet(ff []entity.Food) (*FoodsGet, error) {
+	foods := make([]Food, 0, len(ff))
+	for _, f := range ff {
+		food := Food{
+			f.ID().Value(),
+			f.Value().Name(),
+			f.Value().Unit(),
+		}
+		foods = append(foods, food)
 	}
-	return &FoodGetResponse{response}, nil
+	return &FoodsGet{
+		Foods: foods,
+	}, nil
 }
 
-func NewFoodsPatch(food entity.Foodv3) *FoodsPatch {
+func NewFoodsPost(food entity.Food) *FoodsPost {
+	return &FoodsPost{
+		ID:   food.ID().Value(),
+		Name: food.Value().Name(),
+		Unit: food.Value().Unit(),
+	}
+}
+
+func NewFoodsPatch(food entity.Food) *FoodsPatch {
 	return &FoodsPatch{
 		ID:   food.ID().Value(),
 		Name: food.Value().Name(),
