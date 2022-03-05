@@ -2,7 +2,7 @@ package response
 
 import "github.com/haton14/ohagi-api/domain/entity"
 
-type RecordGetResponse struct {
+type RecordsGet struct {
 	Records []Record `json:"records"`
 }
 
@@ -21,18 +21,18 @@ type FoodContent struct {
 	Amount float64 `json:"amount"`
 }
 
-func NewRecordGetResponse(r []entity.Recordv2) (*RecordGetResponse, error) {
+func NewRecordsGet(r []entity.Recordv3) (*RecordsGet, error) {
 	response := make([]Record, 0, len(r))
 	for _, rr := range r {
-		foods := make([]FoodContent, 0, len(rr.RecordFoods()))
-		for _, f := range rr.RecordFoods() {
-			food := FoodContent{f.Food().ID(), f.Food().Name(), f.Food().Unit(), f.Amount()}
-			foods = append(foods, food)
+		foodContents := make([]FoodContent, 0, rr.LenFoodContent())
+		for _, f := range rr.FoodContents() {
+			foodContent := FoodContent{f.ID(), f.Name(), f.Unit(), f.Amont()}
+			foodContents = append(foodContents, foodContent)
 		}
-		record := Record{rr.ID(), foods, rr.LastUpdatedAt(), rr.CreatedAt()}
+		record := Record{rr.ID(), foodContents, rr.LastUpdatedAt(), rr.CreatedAt()}
 		response = append(response, record)
 	}
-	return &RecordGetResponse{response}, nil
+	return &RecordsGet{response}, nil
 }
 
 func NewRecordsPost(r entity.Recordv3) (*RecordsPost, error) {

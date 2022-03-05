@@ -18,7 +18,7 @@ type CreateRecordIF interface {
 }
 
 type ListRecordIF interface {
-	List(logger echo.Logger) ([]entity.Recordv2, *response.ErrorResponse)
+	List(logger echo.Logger) ([]entity.Recordv3, *response.ErrorResponse)
 }
 
 type Record struct {
@@ -75,7 +75,7 @@ func (u CreateRecord) Create(
 	return record, nil
 }
 
-func (u ListRecord) List(logger echo.Logger) ([]entity.Recordv2, *response.ErrorResponse) {
+func (u ListRecord) List(logger echo.Logger) ([]entity.Recordv3, *response.ErrorResponse) {
 	records, err := u.recordRepo.List()
 	if errors.Is(err, repository.ErrNotFoundRecord) {
 		logger.Warn("%w;recordRepo.List()でエラー", err)

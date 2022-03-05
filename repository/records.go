@@ -14,7 +14,7 @@ import (
 )
 
 type RecordIF interface {
-	List() ([]entity.Recordv2, error)
+	List() ([]entity.Recordv3, error)
 	Save(lastUpdatedAt, createdAt int64) (*entity.Recordv3, error)
 	SaveFoodContent(record entity.Recordv3) error
 }
@@ -27,46 +27,61 @@ func NewRecord(dbClinet *ent.Client) RecordIF {
 	return Record{dbClient: dbClinet}
 }
 
-func (r Record) List() ([]entity.Recordv2, error) {
+func (r Record) List() ([]entity.Recordv3, error) {
 	rq := r.dbClient.Record.Query().Limit(50)
-	recordsDB, err := rq.All(context.Background())
+	recordDatas, err := rq.All(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("[%w]recordの検索時", ErrOthers)
 	}
-	records := make([]entity.Recordv2, 0, len(recordsDB))
-	ids := make([]int, 0, len(recordsDB))
-	for _, r := range recordsDB {
+	records := make([]entity.Recordv3, 0, len(recordDatas))
+	ids := make([]int, 0, len(recordDatas))
+	for _, r := range recordDatas {
 		ids = append(ids, r.ID)
 	}
-	recordFoodsDB, err := r.dbClient.RecordFood.Query().
+	contentDatas, err := r.dbClient.RecordFood.Query().
 		Where(func(s *sql.Selector) { sql.InInts(recordfood.FieldRecordID, ids...) }).
 		All(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("[%w]record_foodsの検索時", ErrOthers)
 	}
-	foodsDB, err := r.dbClient.Food.Query().All(context.Background())
+	foodDatas, err := r.dbClient.Food.Query().All(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("[%w]foodsの検索時", ErrOthers)
 	}
 
-	for _, r := range recordsDB {
-		foods := make([]entity.RecordFood, 0, len(recordFoodsDB))
-		for _, rf := range recordFoodsDB {
-			if r.ID == rf.RecordID {
-				for _, f := range foodsDB {
-					if rf.FoodID == f.ID {
-						food, err := entity.NewRecordFood(f.ID, f.Name, f.Unit, rf.Amount)
+	for _, recordData := range recordDatas {
+		recordID, err := value.NewID(recordData.ID)
+		if err != nil {
+			return nil, err
+		}
+		record := entity.NewRecordv3(*recordID, recordData.LastUpdatedAt.Unix(), recordData.CreatedAt.Unix())
+		for _, contentData := range contentDatas {
+			if recordData.ID == contentData.RecordID {
+				for _, foodData := range foodDatas {
+					if contentData.FoodID == foodData.ID {
+						foodID, err := value.NewID(recordData.ID)
 						if err != nil {
-							return nil, fmt.Errorf("[%w]RecordFood生成時", ErrDomainGenerate)
+							return nil, err
 						}
-						foods = append(foods, *food)
+						name, err := value.NewFoodName(foodData.Name)
+						if err != nil {
+							return nil, err
+						}
+						unit, err := value.NewFoodUnit(foodData.Unit)
+						if err != nil {
+							return nil, err
+						}
+						amount, err := value.NewFoodAmount(contentData.Amount)
+						if err != nil {
+							return nil, err
+						}
+						record.AddFoodContent(*entity.NewFoodv3(*foodID, *value.NewFood(*name, *unit)), *amount)
 						break
 					}
 				}
 			}
 		}
-		record, _ := entity.NewRecordv2(r.ID, foods, r.LastUpdatedAt.Unix(), r.CreatedAt.Unix())
-		records = append(records, record)
+		records = append(records, *record)
 	}
 
 	sort.Slice(records, func(i, j int) bool { return records[i].CreatedAt() < records[j].CreatedAt() })

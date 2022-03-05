@@ -31,7 +31,7 @@ func (r *Record) List(c echo.Context) error {
 		return c.JSON(errResp.HttpStatus, errResp)
 	}
 	// ドメインモデルをレスポンススキーマに変換する
-	resp, err := response.NewRecordGetResponse(records)
+	resp, err := response.NewRecordsGet(records)
 	if err != nil {
 		c.Logger().Error(err)
 		return c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: "予期しないエラー"})
