@@ -12,15 +12,15 @@ import (
 )
 
 type CreateFoodIF interface {
-	Create(food value.Food, logger echo.Logger) (*entity.Foodv3, *response.ErrorResponse)
+	Create(food value.Food, logger echo.Logger) (*entity.Food, *response.ErrorResponse)
 }
 
 type ListFoodIF interface {
-	List(logger echo.Logger) ([]entity.Foodv3, *response.ErrorResponse)
+	List(logger echo.Logger) ([]entity.Food, *response.ErrorResponse)
 }
 
 type UpdateFoodIF interface {
-	Update(food entity.Foodv3, logger echo.Logger) (*entity.Foodv3, *response.ErrorResponse)
+	Update(food entity.Food, logger echo.Logger) (*entity.Food, *response.ErrorResponse)
 }
 type Food struct {
 	CreateFoodIF
@@ -47,7 +47,7 @@ func NewFood(foodRepo repository.FoodIF) Food {
 	}
 }
 
-func (u CreateFood) Create(f value.Food, logger echo.Logger) (*entity.Foodv3, *response.ErrorResponse) {
+func (u CreateFood) Create(f value.Food, logger echo.Logger) (*entity.Food, *response.ErrorResponse) {
 	conflict, err := u.foodRepo.FindByNameUnit(f)
 	if len(conflict) > 0 {
 		return nil, &response.ErrorResponse{Message: "登録しようとした食事は既に存在", HttpStatus: http.StatusConflict}
@@ -60,7 +60,7 @@ func (u CreateFood) Create(f value.Food, logger echo.Logger) (*entity.Foodv3, *r
 	return food, nil
 }
 
-func (u ListFood) List(logger echo.Logger) ([]entity.Foodv3, *response.ErrorResponse) {
+func (u ListFood) List(logger echo.Logger) ([]entity.Food, *response.ErrorResponse) {
 	foods, err := u.foodRepo.List()
 	if errors.Is(err, repository.ErrNotFoundRecord) {
 		logger.Warn("%w;foodRepo.List()でエラー", err)
@@ -72,7 +72,7 @@ func (u ListFood) List(logger echo.Logger) ([]entity.Foodv3, *response.ErrorResp
 	return foods, nil
 }
 
-func (u UpdateFood) Update(food entity.Foodv3, logger echo.Logger) (*entity.Foodv3, *response.ErrorResponse) {
+func (u UpdateFood) Update(food entity.Food, logger echo.Logger) (*entity.Food, *response.ErrorResponse) {
 	_, err := u.foodRepo.FindByID(food.ID())
 	if errors.Is(err, repository.ErrNotFoundRecord) {
 		logger.Error("%w;foodRepo.FindByID()でエラー", err)

@@ -8,7 +8,7 @@ type FoodContent struct {
 	amount value.FoodAmount
 }
 
-func NewFoodContent(food Foodv3, amount value.FoodAmount) *FoodContent {
+func NewFoodContent(food Food, amount value.FoodAmount) *FoodContent {
 	return &FoodContent{foodID: food.ID(), food: food.Value(), amount: amount}
 }
 

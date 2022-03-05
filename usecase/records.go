@@ -14,11 +14,11 @@ import (
 )
 
 type CreateRecordIF interface {
-	Create([]entity.FoodContent, []value.FoodContent, echo.Logger) (*entity.Recordv3, *response.ErrorResponse)
+	Create([]entity.FoodContent, []value.FoodContent, echo.Logger) (*entity.Record, *response.ErrorResponse)
 }
 
 type ListRecordIF interface {
-	List(logger echo.Logger) ([]entity.Recordv3, *response.ErrorResponse)
+	List(logger echo.Logger) ([]entity.Record, *response.ErrorResponse)
 }
 
 type Record struct {
@@ -47,7 +47,7 @@ func (u CreateRecord) Create(
 	foodContentsEntity []entity.FoodContent,
 	foodContentsValue []value.FoodContent,
 	logger echo.Logger,
-) (*entity.Recordv3, *response.ErrorResponse) {
+) (*entity.Record, *response.ErrorResponse) {
 	now := time.Now()
 	record, err := u.recordRepo.Save(now.Unix(), now.Unix())
 	if err != nil {
@@ -75,7 +75,7 @@ func (u CreateRecord) Create(
 	return record, nil
 }
 
-func (u ListRecord) List(logger echo.Logger) ([]entity.Recordv3, *response.ErrorResponse) {
+func (u ListRecord) List(logger echo.Logger) ([]entity.Record, *response.ErrorResponse) {
 	records, err := u.recordRepo.List()
 	if errors.Is(err, repository.ErrNotFoundRecord) {
 		logger.Warn("%w;recordRepo.List()でエラー", err)

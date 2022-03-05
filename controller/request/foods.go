@@ -32,7 +32,7 @@ func NewFoodsPost(c echo.Context) (*value.Food, error) {
 	return value.NewFood(*name, *unit), nil
 }
 
-func NewFoodsPatch(c echo.Context) (*entity.Foodv3, error) {
+func NewFoodsPatch(c echo.Context) (*entity.Food, error) {
 	request := &foodsPatch{}
 	if err := c.Bind(request); err != nil {
 		return nil, err

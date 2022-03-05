@@ -21,7 +21,7 @@ type FoodContent struct {
 	Amount float64 `json:"amount"`
 }
 
-func NewRecordsGet(r []entity.Recordv3) (*RecordsGet, error) {
+func NewRecordsGet(r []entity.Record) (*RecordsGet, error) {
 	response := make([]Record, 0, len(r))
 	for _, rr := range r {
 		foodContents := make([]FoodContent, 0, rr.LenFoodContent())
@@ -35,7 +35,7 @@ func NewRecordsGet(r []entity.Recordv3) (*RecordsGet, error) {
 	return &RecordsGet{response}, nil
 }
 
-func NewRecordsPost(r entity.Recordv3) (*RecordsPost, error) {
+func NewRecordsPost(r entity.Record) (*RecordsPost, error) {
 	foodContents := make([]FoodContent, 0, r.LenFoodContent())
 	for _, f := range r.FoodContents() {
 		foodContent := FoodContent{f.ID(), f.Name(), f.Unit(), f.Amont()}

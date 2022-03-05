@@ -15,7 +15,7 @@ type Food struct {
 	Unit string `json:"unit"`
 }
 
-func NewFoodsGet(ff []entity.Foodv3) (*FoodsGet, error) {
+func NewFoodsGet(ff []entity.Food) (*FoodsGet, error) {
 	foods := make([]Food, 0, len(ff))
 	for _, f := range ff {
 		food := Food{
@@ -30,7 +30,7 @@ func NewFoodsGet(ff []entity.Foodv3) (*FoodsGet, error) {
 	}, nil
 }
 
-func NewFoodsPost(food entity.Foodv3) *FoodsPost {
+func NewFoodsPost(food entity.Food) *FoodsPost {
 	return &FoodsPost{
 		ID:   food.ID().Value(),
 		Name: food.Value().Name(),
@@ -38,7 +38,7 @@ func NewFoodsPost(food entity.Foodv3) *FoodsPost {
 	}
 }
 
-func NewFoodsPatch(food entity.Foodv3) *FoodsPatch {
+func NewFoodsPatch(food entity.Food) *FoodsPatch {
 	return &FoodsPatch{
 		ID:   food.ID().Value(),
 		Name: food.Value().Name(),

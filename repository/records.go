@@ -14,9 +14,9 @@ import (
 )
 
 type RecordIF interface {
-	List() ([]entity.Recordv3, error)
-	Save(lastUpdatedAt, createdAt int64) (*entity.Recordv3, error)
-	SaveFoodContent(record entity.Recordv3) error
+	List() ([]entity.Record, error)
+	Save(lastUpdatedAt, createdAt int64) (*entity.Record, error)
+	SaveFoodContent(record entity.Record) error
 }
 
 type Record struct {
@@ -27,13 +27,13 @@ func NewRecord(dbClinet *ent.Client) RecordIF {
 	return Record{dbClient: dbClinet}
 }
 
-func (r Record) List() ([]entity.Recordv3, error) {
+func (r Record) List() ([]entity.Record, error) {
 	rq := r.dbClient.Record.Query().Limit(50)
 	recordDatas, err := rq.All(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("[%w]recordの検索時", ErrOthers)
 	}
-	records := make([]entity.Recordv3, 0, len(recordDatas))
+	records := make([]entity.Record, 0, len(recordDatas))
 	ids := make([]int, 0, len(recordDatas))
 	for _, r := range recordDatas {
 		ids = append(ids, r.ID)
@@ -88,7 +88,7 @@ func (r Record) List() ([]entity.Recordv3, error) {
 	return records, nil
 }
 
-func (r Record) Save(lastUpdatedAt, createdAt int64) (*entity.Recordv3, error) {
+func (r Record) Save(lastUpdatedAt, createdAt int64) (*entity.Record, error) {
 	data, err := r.dbClient.Record.Create().SetCreatedAt(time.Now()).SetLastUpdatedAt(time.Now()).Save(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("[%w]records保存時, detail:%s", ErrOthers, err)
@@ -100,7 +100,7 @@ func (r Record) Save(lastUpdatedAt, createdAt int64) (*entity.Recordv3, error) {
 	return entity.NewRecordv3(*id, lastUpdatedAt, createdAt), nil
 }
 
-func (r Record) SaveFoodContent(record entity.Recordv3) error {
+func (r Record) SaveFoodContent(record entity.Record) error {
 	bulk := make([]*ent.RecordFoodCreate, 0, record.LenFoodContent())
 	for i, foodContent := range record.FoodContents() {
 		bulk[i] = r.dbClient.RecordFood.Create().
