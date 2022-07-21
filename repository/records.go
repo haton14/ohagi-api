@@ -29,7 +29,7 @@ func NewRecord(dbClinet *ent.Client) RecordIF {
 }
 
 func (r Record) List() ([]entity.Record, error) {
-	rq := r.dbClient.Record.Query().Order(ent.Asc(record.FieldID)).Limit(50)
+	rq := r.dbClient.Record.Query().Order(ent.Desc(record.FieldID)).Limit(50)
 	recordDatas, err := rq.All(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("[%w]recordの検索時", ErrOthers)
