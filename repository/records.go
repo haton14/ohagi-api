@@ -10,6 +10,7 @@ import (
 	"github.com/haton14/ohagi-api/domain/entity"
 	"github.com/haton14/ohagi-api/domain/value"
 	"github.com/haton14/ohagi-api/ent"
+	"github.com/haton14/ohagi-api/ent/record"
 	"github.com/haton14/ohagi-api/ent/recordfood"
 )
 
@@ -28,7 +29,7 @@ func NewRecord(dbClinet *ent.Client) RecordIF {
 }
 
 func (r Record) List() ([]entity.Record, error) {
-	rq := r.dbClient.Record.Query().Limit(50)
+	rq := r.dbClient.Record.Query().Order(ent.Asc(record.FieldID)).Limit(50)
 	recordDatas, err := rq.All(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("[%w]recordの検索時", ErrOthers)
